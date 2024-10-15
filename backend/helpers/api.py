@@ -4,8 +4,8 @@ import os
 def get_weather_data(location):
     """Fetch current weather data from Tomorrow.io API."""
     api_key = os.getenv('WEATHER_API_KEY')
-    base_url = 'https://api.tomorrow.io/v4/timelines'
-    
+    base_url = 'https://api.tomorrow.io/v4/weather/forecast"
+
    
     params = {
         'location': location,
@@ -15,7 +15,7 @@ def get_weather_data(location):
         'apikey': api_key
     }
 
-    response = requests.get(base_url, params=params)
+    response = requests.get(base_url, params=params, apikey=apikey)
 
     if response.status_code == 200:
         return response.json()

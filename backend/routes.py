@@ -1,5 +1,5 @@
-from app import app
-from services.weather_services import get_forcast
+from app import app, db
+from services.weather_services import get_realtime_forecast, get_realtime, get_daily_forecast, get_weekly_forecast, get_current_forecast, get_weather_history
 
 @app.route('/test', methods=['GET'])
 def test():
@@ -10,11 +10,25 @@ def test():
 def home():
     return "Welcome to SkySnap!"
 
-@app.route('/forcast', methods=['GET'])
-def forcast():
-    return get_forcast()
+@app.route('/forecast', methods=['GET'])
+def forecast():
+    return get_daily_forecast()
 
-@app.route('/forcast/weekly', methods=['GET'])
+@app.route('/forecast/current', methods=['GET'])
+def current_forecast():
+    return get_current_forecast()
+
+@app.route('/forecast/realtime', methods=['GET'])
+def real_time_forecast():
+    return get_realtime()
+
+@app.route('/forecast/realtime2', methods=['GET'])
+def real_time_forecast2():
+    return get_realtime_forecast()
+
+# @app.route('/history/{location}', methods=['GET'])
+# def forcast_history():
+#     return get_weather_history({location})
 
     
 
@@ -116,4 +130,6 @@ def forcast():
 #             db.session.add(new_entry)  
 #             db.session.commit()  
             
-#         return jsonify({"message": "Weather data saved successfully!"}, weather_data), 201
+#         return jsonify({"message": "Weather data saved successfully!", "data": weather_data}), 201
+
+
