@@ -1,5 +1,7 @@
 from app import app, db
 from services.weather_services import get_realtime_forecast, get_realtime, get_daily_forecast, get_weekly_forecast, get_current_forecast, get_weather_history
+from services.post_services import create_post
+from services.user_services import create_user
 
 @app.route('/test', methods=['GET'])
 def test():
@@ -26,6 +28,13 @@ def real_time_forecast():
 def real_time_forecast2():
     return get_realtime_forecast()
 
+@app.route('/forecast/create_post', methods=['POST'])
+def create_new_post():
+    return create_post()
+
+@app.route('/forecast/create_user', methods=['POST'])
+def create_new_user():
+    return create_user()
 # @app.route('/history/{location}', methods=['GET'])
 # def forcast_history():
 #     return get_weather_history({location})

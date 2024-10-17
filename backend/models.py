@@ -5,55 +5,58 @@ from app import app, db
 
 # db= SQLAlchemy()
 
-# class User(db.Model):
-#     __tablename__= "User"
+class User(db.Model):
+    __tablename__= "user"
     
-#     id= db.Column(db.Integer, primary_key=True)
-#     username = db.Column(db.String(80), unique=True, nullable = False)
-#     first_name=db.Column(db.String(40), nullable=False)
-#     last_name=db.Column(db.String(40), nullable=False)
-#     password = db.Column(db.String(120), nullable=False)
-#     posts = db.relationship('Post', backref='user', lazy=True)
+    id= db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable = False)
+    first_name=db.Column(db.String(40), nullable=False)
+    last_name=db.Column(db.String(40), nullable=False)
+    password = db.Column(db.String(120), nullable=False)
+    posts = db.relationship('Post', backref='user', lazy=True)
     
-# class Post(db.Model):
-#     __tablename__ = "Post"
+class Post(db.Model):
+    __tablename__ = "post"
     
-#     id = db.Column(db.Integer, primary_key=True)
-#     location = db.Column(db.String(120), nullable=False)
-#     description = db.Column(db.String(500))
-#     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-#     media = db.relationship('Media', backref='post', lazy=True)
-#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-#     image_url = db.Column(db.String(200))
-#     caption = db.Column(db.String(300))
-#     daily_weather_id = db.Column(db.Integer, db.ForeignKey('daily_weather.id'))
-#     daily_weather = db.relationship('DailyWeather', backref='posts')
-#     weekly_weather_id = db.Column(db.Integer, db.ForeignKey('weekly_weather.id'))
-#     weekly_weather = db.relationship('WeeklyWeather', backref='posts')
+    id = db.Column(db.Integer, primary_key=True)
+    location = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    media = db.relationship('Media', backref='post', lazy=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    image_url = db.Column(db.String(200))
+    caption = db.Column(db.String(300))
+    realtime_weather_id= db.Column(db.Integer, db.ForeignKey('realtime_weather.id'))
+    realtime_weather = db.relationship('RealtimeWeather', backref='posts')
+    # daily_weather_id = db.Column(db.Integer, db.ForeignKey('daily_weather.id'))
+    # daily_weather = db.relationship('DailyWeather', backref='posts')
+    # weekly_weather_id = db.Column(db.Integer, db.ForeignKey('weekly_weather.id'))
+    # weekly_weather = db.relationship('WeeklyWeather', backref='posts')
 
 
-#     def __repr__(self):
-#         return f"<Post {self.id}>"
+    def __repr__(self):
+        return f"<Post {self.id}>"
     
-#     def serialize(self):
-#         return {
-#             'id': self.id,
-#             'location': self.location,
-#             'description': self.description,
-#             'created_at': self.created_at.isoformat(),  # Convert datetime to string
-#             'user_id': self.user_id,
-#             'image_url': self.image_url,
-#             'caption': self.caption,
-#             'daily_weather_id': self.daily_weather_id,
-#             'weekly_weather_id': self.weekly_weather_id,
-#         }
+    def serialize(self):
+        return {
+            'id': self.id,
+            'location': self.location,
+            'description': self.description,
+            'created_at': self.created_at.isoformat(),  # Convert datetime to string
+            'user_id': self.user_id,
+            'image_url': self.image_url,
+            'caption': self.caption,
+            'realtime_weather.id': self.realtime_weather.id,
+            # 'daily_weather_id': self.daily_weather_id,
+            # 'weekly_weather_id': self.weekly_weather_id,
+        }
 
-# class Media(db.Model):
-#     __tablename__= "Media"
+class Media(db.Model):
+    __tablename__= "Media"
     
-#     id = db.Column(db.Integer, primary_key=True)
-#     media_url = db.Column(db.String(255), nullable=False)
-#     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    media_url = db.Column(db.String(255), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
     
 
 class WeeklyWeather(db.Model):
@@ -72,13 +75,13 @@ class DailyWeather(db.Model):
     
     
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date)
+    # date = db.Column(db.Date)
     time = db.Column(db.String(30), nullable=False)
     location_name = db.Column(db.String(100), nullable=False)
     lat = db.Column(db.Float, nullable=False)
     lon = db.Column(db.Float, nullable=False)
     temperature = db.Column(db.Float)
-    temperatureApparentAvg= db.Column(db.Float)
+    temperatureApparent= db.Column(db.Float)
     precipitationProbability= db.Column(db.Float)
     humidity= db.Column(db.Float)
     cloudCover= db.Column(db.Float)

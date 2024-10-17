@@ -9,6 +9,7 @@ def get_daily_forecast():
     params = {
     'location': 'sarasota',
     'timestep': '1d',
+    'timestep': '1h',
     'apikey': WEATHER_API_KEY
     }
     
@@ -32,17 +33,18 @@ def get_daily_forecast():
     location_data = data.get('location', {})
     
     for entry in forecast_entries:
+        
         time = entry.get('time', None)
         forecast_values = entry.get('values', {})
         
         # create a new DailyWeather instance
         weather_entry = DailyWeather(
-            time=time,
+            time=location_data.get('time', None),
             location_name=location_data.get('name', 'Unknown'),
             lat=location_data.get('lat', None),
             lon=location_data.get('lon', None),
             temperature=forecast_values.get('temperature', None),
-            temperatureApparentAvg= forecast_values.get('temperatureApparentAvg', None),
+            temperatureApparent= forecast_values.get('temperatureApparent', None),
             precipitationProbability=forecast_values.get('precipitationProbability', None),
             humidity=forecast_values.get('humidity', None),
             cloudCover=forecast_values.get('cloudCover', None),
@@ -55,13 +57,8 @@ def get_daily_forecast():
         db.session.add(weather_entry)
     
    # Commit all the entries to the database
-    # try:
         db.session.commit()
         print("Weather data saved successfully.")
-    # except Exception as e:
-    #     db.session.rollback()
-    #     print(f"Error saving data to the database: {e}")
-    #     return None
 
     return data
 
@@ -132,7 +129,7 @@ def get_realtime_forecast(location='sarasota'):
         time = entry.get('time', None)
         forecast_values = entry.get('values', {})
         weather_entry = RealtimeWeather(
-            time=time,
+            time=location_data.get('time', None),
             location_name=location_data.get('name', 'Unknown'),
             lat=location_data.get('lat', None),
             lon=location_data.get('lon', None),
