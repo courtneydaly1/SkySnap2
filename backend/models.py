@@ -22,12 +22,13 @@ class Post(db.Model):
     location = db.Column(db.String(120), nullable=False)
     description = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # media url only needed*********************************************************
     media = db.relationship('Media', backref='post', lazy=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     image_url = db.Column(db.String(200))
     caption = db.Column(db.String(300))
     realtime_weather_id= db.Column(db.Integer, db.ForeignKey('realtime_weather.id'))
-    realtime_weather = db.relationship('RealtimeWeather', backref='posts')
+    #realtime_weather = db.relationship('RealtimeWeather', backref='post')
     # daily_weather_id = db.Column(db.Integer, db.ForeignKey('daily_weather.id'))
     # daily_weather = db.relationship('DailyWeather', backref='posts')
     # weekly_weather_id = db.Column(db.Integer, db.ForeignKey('weekly_weather.id'))
@@ -113,6 +114,8 @@ class RealtimeWeather(db.Model):
     uvIndex = db.Column(db.Float)
     weatherCode = db.Column(db.Integer)
     visibility = db.Column(db.Float)
+    #post_id= db.Column(db.Integer, db.ForeignKey('post.id'), nullable=false)
+    posts = db.relationship('Post', backref='realtime_weather')
 
     def __repr__(self):
         return f'<RealtimeWeather {self.location_name} at {self.time}>'
