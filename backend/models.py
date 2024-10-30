@@ -13,7 +13,9 @@ class User(db.Model):
     first_name=db.Column(db.String(40), nullable=False)
     last_name=db.Column(db.String(40), nullable=False)
     password = db.Column(db.String(120), nullable=False)
+    local_zipcode= db.Column(db.Integer(5), nullable=False)
     posts = db.relationship('Post', backref='user', lazy=True)
+    
     
 class Post(db.Model):
     __tablename__ = "post"
@@ -22,17 +24,11 @@ class Post(db.Model):
     location = db.Column(db.String(120), nullable=False)
     description = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    # media url only needed*********************************************************
-    media = db.relationship('Media', backref='post', lazy=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     image_url = db.Column(db.String(200))
     caption = db.Column(db.String(300))
     realtime_weather_id= db.Column(db.Integer, db.ForeignKey('realtime_weather.id'))
-    #realtime_weather = db.relationship('RealtimeWeather', backref='post')
-    # daily_weather_id = db.Column(db.Integer, db.ForeignKey('daily_weather.id'))
-    # daily_weather = db.relationship('DailyWeather', backref='posts')
-    # weekly_weather_id = db.Column(db.Integer, db.ForeignKey('weekly_weather.id'))
-    # weekly_weather = db.relationship('WeeklyWeather', backref='posts')
+ 
 
 
     def __repr__(self):
@@ -48,8 +44,6 @@ class Post(db.Model):
             'image_url': self.image_url,
             'caption': self.caption,
             'realtime_weather.id': self.realtime_weather.id,
-            # 'daily_weather_id': self.daily_weather_id,
-            # 'weekly_weather_id': self.weekly_weather_id,
         }
 
 class Media(db.Model):

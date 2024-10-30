@@ -48,30 +48,7 @@ def create_new_user():
 #     posts = Post.query.all()
 #     return jsonify([post.serialize() for post in posts])
 
-# @app.route(')
-# def get_daily_weather():
-#     location = request.args.get('location')  
-#     timestep = request.args.get('timestep', '1d')
-#     WEATHER_API_KEY = os.environ.get('WEATHER_API_KEY') 
-#     BASE_URL = os.envirn.get("BASE_URL") 
-    
-#     if not location:
-#         return jsonify({"error": "Location parameter is required."}), 400
 
-    
-#     url = f"{BASE_URL}/weather/forecast?location={location}&timesteps={timestep}&apikey={WEATHER_API_KEY}"
-#     headers = {"accept": "application/json"}
-
-#     try:
-#         response = requests.get(url, headers=headers)
-#         response.raise_for_status()  
-
-#         weather_data = response.json()  
-#         # daily_weather = DailyWeather(...)  # Create your model instance here
-
-#         return jsonify(weather_data)  
-#     except requests.exceptions.RequestException as e:
-#         return jsonify({"error": str(e)}), 500 
 
 
 # @app.route('/weather/weekly', methods=['GET'])
