@@ -13,7 +13,7 @@ class User(db.Model):
     first_name=db.Column(db.String(40), nullable=False)
     last_name=db.Column(db.String(40), nullable=False)
     password = db.Column(db.String(120), nullable=False)
-    local_zipcode= db.Column(db.Integer(5), nullable=False)
+    local_zipcode= db.Column(db.Integer, nullable=False)
     posts = db.relationship('Post', backref='user', lazy=True)
     
     

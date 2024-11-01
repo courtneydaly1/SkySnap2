@@ -1,3 +1,8 @@
+# Click HERE for SkySnap Schema --->  [SkySnapSchema.pdf](https://github.com/user-attachments/files/17579600/SkySnapSchema.pdf)
+
+# API
+https://docs.tomorrow.io/
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
