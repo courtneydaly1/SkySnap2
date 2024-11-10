@@ -1,7 +1,9 @@
 from app import app, db
+import json
+from flask import Flask, request, abort, jsonify
 from services.weather_services import get_realtime_forecast, get_realtime, get_daily_forecast, get_weekly_forecast, get_current_forecast, get_weather_history
 from services.post_services import create_post
-from services.user_services import create_user
+from services.user_services import create_user, login_user
 
 @app.route('/test', methods=['GET'])
 def test():
@@ -34,22 +36,26 @@ def create_new_post():
 
 @app.route('/forecast/create_user', methods=['POST'])
 def create_new_user():
-    return create_user()
-# @app.route('/history/{location}', methods=['GET'])
-# def forcast_history():
-#     return get_weather_history({location})
+    data = request.get_data(as_text=True)
+    json_data = json.loads(data)
+    return create_user(data= json_data)
+@app.route('/login', methods=['GET'])
+def login():
+    return login_user()
 
     
 
 
-# @app.route('/posts', methods=['GET'])
-# def get_posts():
+@app.route('/posts', methods=['GET'])
+def get_posts():
    
-#     posts = Post.query.all()
-#     return jsonify([post.serialize() for post in posts])
+    posts = Post.query.all()
+    return jsonify([post.serialize() for post in posts])
 
 
-
+# @app.route('/history/{location}', methods=['GET'])
+# def forecast_history():
+#     return get_weather_history({location})
 
 # @app.route('/weather/weekly', methods=['GET'])
 # def get_weekly_weather():

@@ -47,7 +47,7 @@ class Post(db.Model):
         }
 
 class Media(db.Model):
-    __tablename__= "Media"
+    __tablename__= "media"
     
     id = db.Column(db.Integer, primary_key=True)
     media_url = db.Column(db.String(255), nullable=False)
@@ -71,7 +71,7 @@ class DailyWeather(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     # date = db.Column(db.Date)
-    time = db.Column(db.String(30), nullable=False)
+    time = db.Column(db.String(30))
     location_name = db.Column(db.String(100), nullable=False)
     lat = db.Column(db.Float, nullable=False)
     lon = db.Column(db.Float, nullable=False)
