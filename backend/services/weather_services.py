@@ -1,172 +1,160 @@
 from app import app, db
 import requests
 from models import RealtimeWeather, DailyWeather
+from flask import jsonify
 
-WEATHER_API_KEY= app.config['WEATHER_API_KEY']
+WEATHER_API_KEY = app.config['WEATHER_API_KEY']
+BASE_URL = "https://api.tomorrow.io/v4/weather"
 
-def get_daily_forecast():
-    url= f"https://api.tomorrow.io/v4/weather/forecast"
-    params = {
-    'location': 'sarasota',
-    'timestep': '1d',
-    'timestep': '1h',
-    'apikey': WEATHER_API_KEY
-    }
+def fetch_weather_data(endpoint, params):
+    """
+    Generic function to fetch weather data from Tomorrow.io API.
     
+    Args:
+        endpoint (str): The API endpoint to access.
+        params (dict): Query parameters for the API request.
+
+    Returns:
+        dict: Parsed JSON response from the API.
+    """
+    url = f"{BASE_URL}/{endpoint}"
     headers = {"accept": "application/json"}
     try:
-        # Fetch data from the API
         response = requests.get(url, headers=headers, params=params)
-        data = response.json()
+        response.raise_for_status()  # Raise HTTPError for bad responses
+        return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching data from API: {e}")
+        print(f"Error fetching data from {endpoint}: {e}")
         return None
-    
-    # Check if 'timelines' and 'daily' keys are present
-    if 'timelines' in data and 'hourly' in data['timelines']:
-        forecast_entries = data['timelines']['hourly']
-    else:
-        # Handle missing data
-        print("Error: 'hourly' not found in API response")
-        return None
-    
-    location_data = data.get('location', {})
-    
-    for entry in forecast_entries:
-        
-        time = entry.get('time', None)
-        forecast_values = entry.get('values', {})
-        
-        # create a new DailyWeather instance
-        weather_entry = DailyWeather(
-            time=location_data.get('time', None),
-            location_name=location_data.get('name', 'Unknown'),
-            lat=location_data.get('lat', None),
-            lon=location_data.get('lon', None),
-            temperature=forecast_values.get('temperature', None),
-            temperatureApparent= forecast_values.get('temperatureApparent', None),
-            precipitationProbability=forecast_values.get('precipitationProbability', None),
-            humidity=forecast_values.get('humidity', None),
-            cloudCover=forecast_values.get('cloudCover', None),
-            uvIndex=forecast_values.get('uvIndex', None),
-            windSpeed=forecast_values.get('windSpeed', None),
-            
-        )
-        
-        # Save each entry to the database
-        db.session.add(weather_entry)
-    
-   # Commit all the entries to the database
-        db.session.commit()
-        print("Weather data saved successfully.")
 
+
+def get_daily_forecast():
+    """
+    Fetch and save the daily weather forecast.
+    
+    Returns:
+        dict or None: The API response data or None if there was an error.
+    """
+    params = {'location': 'sarasota', 'timestep': '1d', 'apikey': WEATHER_API_KEY}
+    data = fetch_weather_data("forecast", params)
+
+    if not data or 'timelines' not in data or 'daily' not in data['timelines']:
+        print("Error: 'daily' not found in API response")
+        return None
+
+    forecast_entries = data['timelines']['daily']
+    location_data = data.get('location', {})
+
+    for entry in forecast_entries:
+        weather_entry = DailyWeather(
+            time=entry.get('time'),
+            location_name=location_data.get('name', 'Unknown'),
+            lat=location_data.get('lat'),
+            lon=location_data.get('lon'),
+            temperature=entry['values'].get('temperature'),
+            temperatureApparent=entry['values'].get('temperatureApparent'),
+            precipitationProbability=entry['values'].get('precipitationProbability'),
+            humidity=entry['values'].get('humidity'),
+            cloudCover=entry['values'].get('cloudCover'),
+            uvIndex=entry['values'].get('uvIndex'),
+            windSpeed=entry['values'].get('windSpeed'),
+        )
+        db.session.add(weather_entry)
+
+    db.session.commit()
+    print("Daily forecast data saved successfully.")
     return data
 
 
 def get_current_forecast():
-    url= f"https://api.tomorrow.io/v4/weather/forecast"
-    params = {
-    'location': 'sarasota',
-    'timestep': '1h',
-    'apikey': WEATHER_API_KEY
-    }
+    """
+    Fetch the current weather forecast.
     
-    headers = {"accept": "application/json"}
-    
-    response = requests.get(url, headers=headers, params=params)
-    return response.json()
+    Returns:
+        dict or None: The API response data or None if there was an error.
+    """
+    params = {'location': 'sarasota', 'timestep': '1h', 'apikey': WEATHER_API_KEY}
+    return fetch_weather_data("forecast", params)
+
 
 def get_realtime():
-    url= f"https://api.tomorrow.io/v4/weather/realtime"
-    params = {
-    'location': 'sarasota',
-    'apikey': WEATHER_API_KEY
-    }
+    """
+    Fetch real-time weather data.
     
-    headers = {"accept": "application/json"}
-    
-    response = requests.get(url, headers=headers, params=params)
-    return response.json()
+    Returns:
+        dict or None: The API response data or None if there was an error.
+    """
+    params = {'location': 'sarasota', 'apikey': WEATHER_API_KEY}
+    return fetch_weather_data("realtime", params)
+
 
 def get_weekly_forecast():
-    url= f"https://api.tomorrow.io/v4/weather/forecast"
-    params = {
-    'location': 'sarasota',
-    'timestep': '5d',
-    'apikey': WEATHER_API_KEY
-    }
+    """
+    Fetch the weekly weather forecast.
     
-    headers = {"accept": "application/json"}
-    
-    response = requests.get(url, headers=headers, params=params)
-    return response.json()  
-    
+    Returns:
+        dict or None: The API response data or None if there was an error.
+    """
+    params = {'location': 'sarasota', 'timestep': '5d', 'apikey': WEATHER_API_KEY}
+    return fetch_weather_data("forecast", params)
+
+
 def get_realtime_forecast(location='sarasota'):
-    url = f"https://api.tomorrow.io/v4/weather/forecast"
-    params = {
-        'location': location,
-        'timestep': '1h',
-        'apikey': WEATHER_API_KEY
-    }
-    
-    headers = {"accept": "application/json"}
-    
-    # Fetch data from the API
-    response = requests.get(url, headers=headers, params=params)
-    data = response.json()
-  
-    # Check if 'timelines' and 'minutely' keys are present
-    if 'timelines' in data and 'minutely' in data['timelines']:
-        forecast_entries = data['timelines']['minutely']
-    else:
-        # Handle missing data
+    """
+    Fetch and save real-time weather forecast data.
+
+    Args:
+        location (str): The location for the weather data.
+
+    Returns:
+        dict or None: The API response data or None if there was an error.
+    """
+    params = {'location': location, 'timestep': '1h', 'apikey': WEATHER_API_KEY}
+    data = fetch_weather_data("forecast", params)
+
+    if not data or 'timelines' not in data or 'minutely' not in data['timelines']:
         print("Error: 'minutely' not found in API response")
         return None
-    
-    location_data = data.get('location', {})
-    
-    for entry in forecast_entries:
-        time = entry.get('time', None)
-        forecast_values = entry.get('values', {})
-        weather_entry = RealtimeWeather(
-            time=location_data.get('time', None),
-            location_name=location_data.get('name', 'Unknown'),
-            lat=location_data.get('lat', None),
-            lon=location_data.get('lon', None),
-            cloudBase=forecast_values.get('cloudBase', None),
-            cloudCeiling=forecast_values.get('cloudCeiling', None),
-            cloudCover=forecast_values.get('cloudCover', None),
-            dewPoint=forecast_values.get('dewPoint', None),
-            humidity=forecast_values.get('humidity', None),
-            precipitationProbability=forecast_values.get('precipitationProbability', None),
-            pressureSurfaceLevel=forecast_values.get('pressureSurfaceLevel', None),
-            temperature=forecast_values.get('temperature', None),
-            windSpeed=forecast_values.get('windSpeed', None),
-            windDirection=forecast_values.get('windDirection', None),
-            uvIndex=forecast_values.get('uvIndex', None),
-            weatherCode=forecast_values.get('weatherCode', None),
-            visibility=forecast_values.get('visibility', None)
-        )
-        
-        # Save each entry to the database
-        db.session.add(weather_entry)
-    
-    # Commit all entries to the database at once
-    db.session.commit()
 
+    forecast_entries = data['timelines']['minutely']
+    location_data = data.get('location', {})
+
+    for entry in forecast_entries:
+        weather_entry = RealtimeWeather(
+            time=entry.get('time'),
+            location_name=location_data.get('name', 'Unknown'),
+            lat=location_data.get('lat'),
+            lon=location_data.get('lon'),
+            cloudBase=entry['values'].get('cloudBase'),
+            cloudCeiling=entry['values'].get('cloudCeiling'),
+            cloudCover=entry['values'].get('cloudCover'),
+            dewPoint=entry['values'].get('dewPoint'),
+            humidity=entry['values'].get('humidity'),
+            precipitationProbability=entry['values'].get('precipitationProbability'),
+            pressureSurfaceLevel=entry['values'].get('pressureSurfaceLevel'),
+            temperature=entry['values'].get('temperature'),
+            windSpeed=entry['values'].get('windSpeed'),
+            windDirection=entry['values'].get('windDirection'),
+            uvIndex=entry['values'].get('uvIndex'),
+            weatherCode=entry['values'].get('weatherCode'),
+            visibility=entry['values'].get('visibility'),
+        )
+        db.session.add(weather_entry)
+
+    db.session.commit()
+    print("Real-time forecast data saved successfully.")
     return data
 
 
+def get_weather_history(location):
+    """
+    Fetch recent weather history.
 
-def get_weather_history(location, WEATHER_API_KEY):
-    url = f"https://api.tomorrow.io/v4/weather/history/recent?location={location}&apikey={WEATHER_API_KEY}"
-    params = {
-    'location': '{location} ',
-    'apikey': WEATHER_API_KEY
-    }
-    headers = {"accept": "application/json"}
-    
-    response = requests.get(url, headers=headers, params=params)
-    return response.json() 
+    Args:
+        location (str): The location for the weather history.
 
-# https://api.tomorrow.io/v4/weather/forecast?location=new%20york&apikey=1BGZpjozyIwY6TIyMf5rMIS9ajB8gvsk
+    Returns:
+        dict or None: The API response data or None if there was an error.
+    """
+    params = {'location': location, 'apikey': WEATHER_API_KEY}
+    return fetch_weather_data("history/recent", params)
