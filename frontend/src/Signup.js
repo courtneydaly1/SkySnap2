@@ -38,7 +38,7 @@ function Signup() {
           placeholder="First Name"
           required
           id="first_name"
-          autocomplete="given-name"
+          autoComplete="given-name"
         />
         <input
           className="signup-input"
@@ -47,7 +47,7 @@ function Signup() {
           placeholder="Last Name"
           required
           id="last_name"
-          autocomplete="family-name"
+          autoComplete="family-name"
         />
         <input
           className="signup-input"
@@ -56,7 +56,7 @@ function Signup() {
           placeholder="Username"
           required
           id="username"
-          autocomplete="username"
+          autoComplete="username"
         />
         <input
           className="signup-input"
@@ -65,7 +65,7 @@ function Signup() {
           placeholder="Zipcode"
           required
           id="local_zipcode"
-          autocomplete="postal-code"
+          autoComplete="postal-code"
         />
         <input
           className="signup-input"
@@ -75,7 +75,7 @@ function Signup() {
           placeholder="Password"
           required
           id="password"
-          autocomplete="new-password"
+          autoComplete="new-password"
         />
         <button type="submit" className="signup-button">Sign Up</button>
       </form>

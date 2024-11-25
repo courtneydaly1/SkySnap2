@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import WeatherForm from "./WeatherForm"; 
-import WeatherApi from "./WeatherApi"; // Centralized API handler
+import WeatherApi from "./WeatherApi"; 
 
 function WeatherApp() {
   const [weatherData, setWeatherData] = useState(null);
@@ -10,7 +10,7 @@ function WeatherApp() {
   const fetchWeatherData = async (location) => {
     setError(null); // Clear previous errors
     try {
-      const data = await WeatherApi.getWeather(location); // Use WeatherApi
+      const data = await WeatherApi.getWeather(location); 
       setWeatherData(data);
     } catch (err) {
       console.error("Error fetching weather data:", err);

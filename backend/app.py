@@ -11,6 +11,12 @@ db = SQLAlchemy(app)
 
 from models import *
 
+@app.after_request
+def add_security_headers(response):
+    response.headers["Content-Security-Policy"] = "script-src 'self'"
+    return response
+
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all() 

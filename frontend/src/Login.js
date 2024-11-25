@@ -59,7 +59,7 @@ function Login() {
           onChange={handleChange}
           placeholder="Password"
           required
-          autoComplete="current-password" 
+          ete="current-password" 
         />
         <button type="submit" className="login-button">Login</button>
       </form>
