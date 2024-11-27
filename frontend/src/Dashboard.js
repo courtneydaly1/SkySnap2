@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './Dashboard.css'; // Import a CSS file for styling
+import './Dashboard.css'; 
 
 function Dashboard({ user }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('token'); // Clear the token
-    navigate('/login'); // Redirect to login page
+    localStorage.removeItem('token'); 
+    navigate('/login'); 
   };
 
   return (

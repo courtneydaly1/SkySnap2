@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Signup from './Signup';
-import Login from './Login';
+import Signup from './auth/SignupForm';
+import Login from './auth/LoginForm';
 import Home from './Home';
 import Dashboard from './Dashboard';
 
@@ -36,7 +36,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/dashboard" element={<PrivateRoute> <Dashboard /> </PrivateRoute>} />
         </Routes>
       </div>
     </Router>

@@ -1,30 +1,63 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './Signup.css'; // Import the CSS file for styling
+import './SignupForm.css'; 
+import Alert from "../common/Alert"
 
-function Signup() {
-  const [formData, setFormData] = useState({ first_name: '', last_name: '', username: '', password: '', local_zipcode: '' });
-  const [error, setError] = useState(null);
+
+/** Signup form.
+ *
+ * Shows form and manages update to state on changes.
+ * On submission:
+ * - calls signup function prop
+ * - redirects to /companies route
+ *
+ * Routes -> SignupForm -> Alert
+ * Routed as /signup
+ */
+
+function SignupForm({ signup }) {
+  const [formData, setFormData] = useState({ 
+    first_name: '', 
+    last_name: '',
+    username: '', 
+    password: '', 
+    local_zipcode: '' 
+  });
+  const [formErrors, setFormErrors] = useState([]);
   const navigate = useNavigate();
+
+  console.debug(
+    "SignupForm",
+    "signup=", typeof signup,
+    "formData=", formData,
+    "formErrors=", formErrors,
+);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const BASE_URL = 'https://localhost:5000';
+  /** Handle form submit:
+   *
+   * Calls login func prop and, if successful, redirect to /dashboard.
+   */
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    try {
-      const response = await axios.post(`${BASE_URL}/signup`, formData);
-      localStorage.setItem('token', response.data.token); // Store token
-      navigate('/dashboard');
-    } catch (err) {
-      const errorMessage = err.response ? err.response.data.message : 'An error occurred';
-      setError(errorMessage);
+    let result = await signup(formData);
+    if (result.success){
+     navigate("/dashboard");
+    }else {
+      setFormErrors(result.errors)
     }
-  };
+  }
+
+  /** Update form data field */
+  function handleChange(evt) {
+    const { name, value } = evt.target;
+    setFormData(data => ({ ...data, [name]: value }));
+  }
+    
 
   return (
     <div className="signup-container">
@@ -38,6 +71,7 @@ function Signup() {
           placeholder="First Name"
           required
           id="first_name"
+          value = {form.first_name}
           autoComplete="given-name"
         />
         <input
@@ -47,6 +81,7 @@ function Signup() {
           placeholder="Last Name"
           required
           id="last_name"
+          value = {form.last_name}
           autoComplete="family-name"
         />
         <input
@@ -56,6 +91,7 @@ function Signup() {
           placeholder="Username"
           required
           id="username"
+          value = {form.username}
           autoComplete="username"
         />
         <input
@@ -65,6 +101,7 @@ function Signup() {
           placeholder="Zipcode"
           required
           id="local_zipcode"
+          value = {form.local_zipcode}
           autoComplete="postal-code"
         />
         <input
@@ -75,14 +112,24 @@ function Signup() {
           placeholder="Password"
           required
           id="password"
+          value = {form.password}
           autoComplete="new-password"
         />
-        <button type="submit" className="signup-button">Sign Up</button>
+        {formErrors.length
+                    ? <Alert type="danger" messages={formErrors} />
+                    : null
+                }
+        <button 
+        type="submit" 
+        className="signup-button"
+        >
+          Sign Up
+        </button>
       </form>
 
     </div>
   );
 }
 
-export default Signup;
+export default SignupForm;
 
