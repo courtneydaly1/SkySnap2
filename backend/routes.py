@@ -80,24 +80,31 @@ def signup():
         # You can also validate the presence of required fields
         if not data.get("username") or not data.get("password"):
             return jsonify({"error": "Missing required fields"}), 400
-
+        
         response = create_user(data=data)
         return jsonify(response), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# @app.route('/auth/check-username', methods=['POST'])
-# def check_username():
-#     """Check if the username is already taken."""
-#     data = request.get_json()
-#     username = data.get('username')
-#     if not username:
-#         return jsonify({"error": "Username is required"}), 400
-    
-#     user = User.query.filter_by(username=username).first()
-#     if user:
-#         return jsonify({"message": "Username is already taken"}), 400
-#     return jsonify({"message": "Username is available"}), 200
+def create_user(data):
+    """Handles user creation logic."""
+    username = data["username"]
+    password = data["password"]
+    first_name = data["first_name"]
+    last_name= data["last_name"]
+    local_zipcode= data["local_zipcode"]
+    new_user = User(
+        username=username, 
+        password=password, 
+        first_name=first_name, 
+        last_name= last_name, 
+        local_zipcode= local_zipcode)
+    db.session.add(new_user)
+    db.session.commit()
+
+    # Respond with a success message
+    return {"success": True, "message": "User created successfully"}
+
 
 
 @app.route('/auth/login', methods=['POST'])

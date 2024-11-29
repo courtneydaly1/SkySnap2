@@ -45,6 +45,7 @@ function SignupForm({ signup }) {
 
     try {
       const result = await signup(formData);
+      console.log(result)
       if (result.success) {
         navigate("/dashboard");
       } else {
