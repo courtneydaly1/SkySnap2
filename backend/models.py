@@ -2,7 +2,6 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from app import app, db
 
-
 class User(db.Model):
     __tablename__ = "user"
     
@@ -11,9 +10,8 @@ class User(db.Model):
     first_name = db.Column(db.String(40), nullable=False)
     last_name = db.Column(db.String(40), nullable=False)
     password = db.Column(db.String(120), nullable=False)
-    local_zipcode = db.Column(db.Integer, nullable=False)
+    local_zipcode = db.Column(db.String(10), nullable=False)
     posts = db.relationship('Post', backref='user', lazy=True)
-
 
 class Post(db.Model):
     __tablename__ = "post"
@@ -26,6 +24,8 @@ class Post(db.Model):
     image_url = db.Column(db.String(200))
     caption = db.Column(db.String(300))
     realtime_weather_id = db.Column(db.Integer, db.ForeignKey('realtime_weather.id'))
+    
+    media = db.relationship('Media', backref='post', lazy=True)
     
     def __repr__(self):
         return f"<Post {self.id}>"
@@ -45,14 +45,12 @@ class Post(db.Model):
             } if self.realtime_weather else None,
         }
 
-
 class Media(db.Model):
     __tablename__ = "media"
     
     id = db.Column(db.Integer, primary_key=True)
     media_url = db.Column(db.String(255), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
-
 
 class WeeklyWeather(db.Model):
     __tablename__ = "weekly_weather"
@@ -64,7 +62,6 @@ class WeeklyWeather(db.Model):
 
     def __repr__(self):
         return f"<WeeklyWeather {self.week_start_date} - {self.location}>"
-
 
 class DailyWeather(db.Model):
     __tablename__ = "daily_weather"
@@ -85,7 +82,6 @@ class DailyWeather(db.Model):
 
     def __repr__(self):
         return f"<DailyWeather {self.time}>"
-
 
 class RealtimeWeather(db.Model):
     __tablename__ = 'realtime_weather'
@@ -112,4 +108,5 @@ class RealtimeWeather(db.Model):
 
     def __repr__(self):
         return f"<RealtimeWeather {self.location_name} at {self.time}>"
+
 

@@ -1,15 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom"; 
-import './LoginForm.css'
+import './LoginForm.css';
 import Alert from "../common/Alert"; 
 
-function LoginForm({ login })  {
+/** Login form.
+ *
+ * Shows form and manages updates to state on changes.
+ * On submission:
+ * - calls login function prop
+ * - redirects to /dashboard route on success
+ *
+ * Routes -> LoginForm -> Alert
+ * Routed as /login
+ */
+
+function LoginForm({ login }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ 
     username: '', 
-    password: '' });
+    password: '' 
+  });
   const [formErrors, setFormErrors] = useState([]);
-  
+  const [isLoading, setIsLoading] = useState(false);  // Track loading state
+
   console.debug(
     "LoginForm",
     "login=", typeof login,
@@ -17,28 +30,29 @@ function LoginForm({ login })  {
     "formErrors", formErrors,
   );
 
-  // Calls login func prop, if sucessful, redirects to /dashboard
- // Handle form submission
- async function handleSubmit(e) {
-  e.preventDefault();
-  setFormErrors([]); 
-  try {
-    const result = await login(formData); 
-    if (result.success) {
-      navigate('/dashboard'); 
-    } else {
-      setFormErrors(result.errors); 
-    }
-  } catch (error) {
-    console.error("Login error:", error);
-    setFormErrors(["An unexpected error occurred."]);
-  }
-}
+  /** Handle form submission:
+   *
+   * Calls login func prop and, if successful, redirects to /dashboard.
+   */
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setFormErrors([]);  
+    setIsLoading(true); 
 
-  // update form data
-  function handleChange(e){
+    const result = await login(formData); 
+    setIsLoading(false); 
+
+    if (result.success) {
+      navigate('/dashboard');  
+    } else {
+      setFormErrors(result.errors || ['Login failed. Please try again.']);  
+    }
+  }
+
+  /** Update form data on change */
+  function handleChange(e) {
     const { name, value } = e.target;
-    setFormData(l => ({...l, [name]: value}))
+    setFormData(l => ({ ...l, [name]: value }));
   }
 
   return (
@@ -62,18 +76,19 @@ function LoginForm({ login })  {
           onChange={handleChange}
           placeholder="Password"
           required
-          ete="current-password" 
+          autoComplete="current-password" 
         />
 
-        {formErrors.length
-                    ? <Alert type="danger" messages={formErrors} />
-                    : null}
+        {formErrors.length > 0 && (
+          <Alert type="danger" messages={formErrors} />
+        )}
 
         <button
-        type="submit" 
-        className="login-button"
+          type="submit" 
+          className="login-button"
+          disabled={isLoading} 
         >
-          Login
+          {isLoading ? 'Logging in...' : 'Login'}  
         </button>
       </form>
     </div>
@@ -81,3 +96,4 @@ function LoginForm({ login })  {
 }
 
 export default LoginForm;
+

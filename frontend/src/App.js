@@ -1,48 +1,91 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Signup from './auth/SignupForm';
-import Login from './auth/LoginForm';
-import Home from './Home';
-import Dashboard from './Dashboard';
+import { useNavigate, Routes, Route } from 'react-router-dom';  
+import WeatherApi from './api';
+import UserContext from './auth/UserContext';
+import jwt from 'jsonwebtoken';
+import useLocalStorage from './hooks/useLocalStorage';
+import Navigation from './Navigation';
+import LoginForm from './auth/LoginForm';
+import SignupForm from './auth/SignupForm';
+import LoadingSpinner from './LoadingSpinner';
 
-function PrivateRoute({ children }) {
-  const isAuthenticated = localStorage.getItem('token');
-  return isAuthenticated ? children : <Navigate to="/login" />;
-}
+export const TOKEN_STORAGE_ID = 'weatherApi-token';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+  const navigate = useNavigate();  // Use the hook here
+  const [infoLoaded, setInfoLoaded] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [token, setToken] = useLocalStorage(TOKEN_STORAGE_ID);
 
   useEffect(() => {
-    // Re-check authentication when the app loads or state changes
-    setIsAuthenticated(!!localStorage.getItem('token'));
-  }, []);
+    console.debug('App useEffect loadUserInfo', 'token=', token);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsAuthenticated(false);
-    window.location.href = '/';
-  };
+    async function getCurrentUser() {
+      if (token) {
+        try {
+          // Decode the token to get the username
+          const decodedToken = jwt.decode(token);
+          if (decodedToken && decodedToken.username) {
+            WeatherApi.token = token;
+            const currentUser = await WeatherApi.getCurrentUser(decodedToken.username);
+            setCurrentUser(currentUser);
+          } else {
+            console.error('Invalid token: no username found.');
+            setCurrentUser(null);
+          }
+        } catch (err) {
+          console.error('App loadUserInfo: problem loading', err);
+          setCurrentUser(null);
+        }
+      }
+      setInfoLoaded(true);
+    }
+
+    setInfoLoaded(false);
+    getCurrentUser();
+  }, [token]);
+
+  function handleLogout() {
+    setCurrentUser(null);
+    setToken(null);
+    navigate('/');  // Navigate to the home page after logging out
+  }
+
+  async function signup(signupData) {
+    try {
+      let token = await WeatherApi.signup(signupData);
+      setToken(token);
+      return { success: true };
+    } catch (e) {
+      console.error('signup failed', e?.message || e);
+      return { success: false, e: e?.message || e };
+    }
+  }
+
+  async function login(loginData) {
+    try {
+      let token = await WeatherApi.login(loginData);
+      setToken(token);
+      return { success: true };
+    } catch (e) {
+      console.error('login failed', e?.message || e);
+      return { success: false, e: e?.message || e };
+    }
+  }
+
+  if (!infoLoaded) return <LoadingSpinner />;
 
   return (
-    <Router>
-      <div>
-        {isAuthenticated && (
-          <button onClick={handleLogout} style={{ position: 'absolute', top: 10, right: 10 }}>
-            Logout
-          </button>
-        )}
+    <div className="App">
+      <UserContext.Provider value={{ currentUser, setCurrentUser }}>
+        <Navigation logout={handleLogout} />
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<PrivateRoute> <Dashboard /> </PrivateRoute>} />
+          <Route path="/login" element={<LoginForm login={login} />} />
+          <Route path="/signup" element={<SignupForm signup={signup} />} />
         </Routes>
-      </div>
-    </Router>
+      </UserContext.Provider>
+    </div>
   );
 }
 
 export default App;
-
-

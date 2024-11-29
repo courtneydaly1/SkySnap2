@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3000";
 
 /** API Class.
  *
@@ -11,7 +11,7 @@ const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
  */
 
 class WeatherApi {
-  // the token for interactive with the API will be stored here.
+  // the token for interacting with the API will be stored here.
   static token;
 
   static async request(endpoint, data = {}, method = "get") {
@@ -22,10 +22,25 @@ class WeatherApi {
     const params = method === "get" ? data : {};
 
     try {
-      return (await axios({ url, method, data, params, headers })).data;
+      const response = await axios({
+        url,
+        method,
+        data,
+        params,
+        headers,
+        timeout: 5000,  // Adding a 5-second timeout
+      });
+      return response.data;
     } catch (err) {
-      console.error("API Error:", err.response);
-      let message = err.response?.data?.error?.message || "An error occurred";
+      console.error("API Error:", err.response || err);
+      let message = "An error occurred"; 
+
+      if (err.response) {
+        message = err.response?.data?.error?.message || err.response?.data?.message || message;
+      } else if (err.message) {
+        message = err.message;  // For cases like network errors
+      }
+
       throw Array.isArray(message) ? message : [message];
     }
   }
@@ -37,16 +52,11 @@ class WeatherApi {
     let res = await this.request(`users/${username}`);
     return res.user;
   }
-    // WeatherApi.js
+
+  /** Register a new user. */
   static async signup(data) {
     let res = await this.request("auth/signup", data, "post");
     return res.token; // Return the token for storage
-  }
-
-  /** Register a new user. */
-  static async register(data) {
-    let res = await this.request("auth/register", data, "post");
-    return res.token;
   }
 
   /** Login a user. */
@@ -79,12 +89,11 @@ class WeatherApi {
     return res.weather;
   }
 
-  
+  /** Fetch weather by location name. */
   static async getWeather(location) {
     return await this.request("weather", { location }, "get");
   }
-
-
 }
 
 export default WeatherApi;
+

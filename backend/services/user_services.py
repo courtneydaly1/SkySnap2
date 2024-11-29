@@ -24,10 +24,14 @@ def create_user(data):
         password = data.get('password')
 
         # Validate the input
-        if not username or not first_name or not last_name or not password:
-            return jsonify({
-                "error": "All fields (username, first_name, last_name, local_zipcode, password) are required."
-            }), 400
+        if not username:
+            return jsonify({"error": "Username is required."}), 400
+        if not first_name:
+            return jsonify({"error": "First name is required."}), 400
+        if not last_name:
+            return jsonify({"error": "Last name is required."}), 400
+        if not password:
+            return jsonify({"error": "Password is required."}), 400
 
         # Check if the username is already taken
         if User.query.filter_by(username=username).first():
@@ -79,21 +83,25 @@ def login_user():
         # Fetch the user from the database
         user = User.query.filter_by(username=username).first()
 
+        if not user:
+            return jsonify({"error": "Invalid username or password."}), 401
+
         # Validate the user's password
-        if user and check_password_hash(user.password, password):
-            # Generate a JWT access token
-            access_token = create_access_token(identity=user.id)
+        if check_password_hash(user.password, password):
+            # Generate a JWT access token with an optional expiration time (e.g., 24 hours)
+            access_token = create_access_token(identity=user.id, expires_delta=False)
             return jsonify({
                 "message": "Login successful",
                 "access_token": access_token
             }), 200
 
-        # Invalid credentials
+        # Invalid password
         return jsonify({"error": "Invalid username or password."}), 401
 
     except Exception as e:
         # Handle unexpected errors
         return jsonify({"error": "An error occurred while logging in.", "details": str(e)}), 500
+
 
 
 

@@ -14,6 +14,10 @@ def create_post():
         # Parse the JSON data from the request
         data = request.get_json()
 
+        # Validate if the request has data
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
         # Extract necessary fields
         location = data.get('location')
         description = data.get('description')
@@ -54,6 +58,7 @@ def create_post():
     except Exception as e:
         # Log and return any unexpected errors
         return jsonify({"error": "An error occurred while creating the post.", "details": str(e)}), 500
+
 
            
 

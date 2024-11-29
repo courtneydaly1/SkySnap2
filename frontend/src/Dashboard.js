@@ -1,14 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './Dashboard.css'; 
+import './Dashboard.css';
 
 function Dashboard({ user }) {
+  const [isLoading, setIsLoading] = useState(true); 
+  const [error, setError] = useState(null); 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    setTimeout(() => {
+      if (!user) {
+        setError('User data not available.');
+      } else {
+        setIsLoading(false);
+      }
+    }, 1000); 
+  }, [user]);
+
   const handleLogout = () => {
-    localStorage.removeItem('token'); 
-    navigate('/login'); 
+    const confirmLogout = window.confirm('Are you sure you want to log out?');
+    if (confirmLogout) {
+      localStorage.removeItem('token'); 
+      navigate('/login'); 
+    }
   };
+
+  if (isLoading) {
+    return <p>Loading user data...</p>;
+  }
+
+  if (error) {
+    return <p style={{ color: 'red' }}>{error}</p>;
+  }
 
   return (
     <div className="dashboard-container">
