@@ -53,14 +53,18 @@ function App() {
 
   async function signup(signupData) {
     try {
+      // Call the API to sign up and get the token
       let token = await WeatherApi.signup(signupData);
-      setToken(token);
-      return { success: true };
+      setToken(token);  // Assuming setToken saves the token in state or local storage
+      return { success: true };  // Return success if signup is successful
     } catch (e) {
-      console.error('signup failed', e?.message || e);
-      return { success: false, e: e?.message || e };
+      console.error('Signup failed', e?.message || e);
+      
+      // Return an error message in a consistent format that the form expects
+      return { success: false, errors: [e?.message || "An error occurred during signup."] };
     }
   }
+  
 
   async function login(loginData) {
     try {

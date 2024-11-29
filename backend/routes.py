@@ -66,7 +66,7 @@ def real_time_forecast2():
 
 # User Routes
 @app.route('/auth/signup', methods=['POST', 'OPTIONS'])
-@cross_origin(origins="http://localhost:5000")
+@cross_origin(origins="http://localhost:3000")
 def signup():
     """User Signup Endpoint."""
     if request.method == 'OPTIONS':
@@ -85,6 +85,19 @@ def signup():
         return jsonify(response), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# @app.route('/auth/check-username', methods=['POST'])
+# def check_username():
+#     """Check if the username is already taken."""
+#     data = request.get_json()
+#     username = data.get('username')
+#     if not username:
+#         return jsonify({"error": "Username is required"}), 400
+    
+#     user = User.query.filter_by(username=username).first()
+#     if user:
+#         return jsonify({"message": "Username is already taken"}), 400
+#     return jsonify({"message": "Username is available"}), 200
 
 
 @app.route('/auth/login', methods=['POST'])

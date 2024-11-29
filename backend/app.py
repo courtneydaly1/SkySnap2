@@ -1,4 +1,4 @@
-from flask import Flask, request, make_response  # Correctly import make_response
+from flask import Flask, request, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 

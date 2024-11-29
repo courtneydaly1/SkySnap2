@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3000";
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
 
 /** API Class.
  *
@@ -58,7 +58,11 @@ class WeatherApi {
     let res = await this.request("auth/signup", data, "post");
     return res.token; // Return the token for storage
   }
-
+  /** Check if username is available. */
+  static async checkUsername(username) {
+    let res = await this.request("auth/check-username", { username }, "post");
+    return res.message; 
+  }
   /** Login a user. */
   static async login(data) {
     let res = await this.request("auth/login", data, "post");
