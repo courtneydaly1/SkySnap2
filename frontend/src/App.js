@@ -12,7 +12,7 @@ import LoadingSpinner from './LoadingSpinner';
 export const TOKEN_STORAGE_ID = 'weatherApi-token';
 
 function App() {
-  const navigate = useNavigate();  // Use the hook here
+  const navigate = useNavigate();  
   const [infoLoaded, setInfoLoaded] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useLocalStorage(TOKEN_STORAGE_ID);
@@ -48,7 +48,7 @@ function App() {
   function handleLogout() {
     setCurrentUser(null);
     setToken(null);
-    navigate('/');  // Navigate to the home page after logging out
+    navigate('/');  
   }
 
   async function signup(signupData) {

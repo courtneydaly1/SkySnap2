@@ -4,15 +4,15 @@ import { NavLink } from "react-router-dom";
 function Navigation({ isLoggedIn, logout }) {
   return (
     <nav style={navStyle}>
-      <NavLink to="/" style={linkStyle} activeStyle={activeLinkStyle}>
+      <NavLink to="/" style={linkStyle} activestyle={activeLinkStyle}>
         Home
       </NavLink>
       {!isLoggedIn && (
         <>
-          <NavLink to="/login" style={linkStyle} activeStyle={activeLinkStyle}>
+          <NavLink to="/login" style={linkStyle} activestyle={activeLinkStyle}>
             Login
           </NavLink>
-          <NavLink to="/signup" style={linkStyle} activeStyle={activeLinkStyle}>
+          <NavLink to="/signup" style={linkStyle} activestyle={activeLinkStyle}>
             Signup
           </NavLink>
         </>

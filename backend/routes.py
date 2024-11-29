@@ -3,10 +3,11 @@ from flask import jsonify, request
 from flask_cors import cross_origin
 import json
 from services.weather_services import (
+    fetch_weather_data,
+    save_weather_data,
     get_realtime_forecast,
-    get_realtime,
     get_daily_forecast,
-    get_current_forecast,
+    get_weather_history,
 )
 from services.post_services import create_post
 from services.user_services import create_user, login_user
@@ -65,7 +66,7 @@ def real_time_forecast2():
 
 # User Routes
 @app.route('/auth/signup', methods=['POST', 'OPTIONS'])
-@cross_origin(origins="http://localhost:3000")
+@cross_origin(origins="http://localhost:5000")
 def signup():
     """User Signup Endpoint."""
     if request.method == 'OPTIONS':

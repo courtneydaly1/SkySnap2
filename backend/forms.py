@@ -32,7 +32,7 @@ class LoginForm(FlaskForm):
         render_kw={"class": "form-control"}
     )
 
-class RegisterForm(FlaskForm):
+class SignupForm(FlaskForm):
     """User registration form."""
 
     username = StringField(
@@ -55,9 +55,9 @@ class RegisterForm(FlaskForm):
         validators=[InputRequired(), Email(), Length(max=100)],
         render_kw={"class": "form-control"}
     )
-    phone_number = StringField(
-        "Phone Number",
-        validators=[Optional(), phone_number],
+    local_zipcode = StringField(
+        "Zipcode",
+        validators=[Optional(), local_zipcode],
         render_kw={"class": "form-control"}
     )
     first_name = StringField(
