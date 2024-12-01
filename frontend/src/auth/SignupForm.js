@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SignupForm.css';
 import Alert from "../common/Alert";
-import WeatherApi from "../api";  
+
 
 /** Signup form.
  *

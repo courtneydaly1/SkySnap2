@@ -1,4 +1,5 @@
 from flask import Flask, request, make_response
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
@@ -22,11 +23,19 @@ from models import *
 def add_security_headers(response):
     response.headers["Content-Security-Policy"] = "script-src 'self'"  # Fine-tune for your app
     return response
+    app.logger.info('This is info output')
+with app.app_context():
+    db.create_all()  # Make sure your DB is set up
+    # app.logger.info('This is info output')
+    # app.run(debug=True)
+
 
 # Main entry point for app
+
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  # Make sure your DB is set up
+        # db.create_all()  # Make sure your DB is set up
+        # app.logger.info('This is info output')
         app.run(debug=True)
 
 # Import routes after app initialization

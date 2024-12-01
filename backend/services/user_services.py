@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request, jsonify, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 from models import User
@@ -23,22 +23,23 @@ def create_user(data):
         local_zipcode = data.get('local_zipcode')
         password = data.get('password')
 
+        # return ("hello world")
         # Validate the input
         if not username:
-            return jsonify({"error": "Username is required."}), 400
+            return jsonify({"error": "Username is required."})
         if not first_name:
-            return jsonify({"error": "First name is required."}), 400
+            return jsonify({"error": "First name is required."})
         if not last_name:
-            return jsonify({"error": "Last name is required."}), 400
+            return jsonify({"error": "Last name is required."})
         if not password:
-            return jsonify({"error": "Password is required."}), 400
+            return jsonify({"error": "Password is required."})
 
         # Check if the username is already taken
         if User.query.filter_by(username=username).first():
-            return jsonify({"error": "Username already exists."}), 400
+            return {"error": "Username already exists."} 
 
         # Hash the password
-        hashed_password = generate_password_hash(password, method='sha256')
+        hashed_password = generate_password_hash(password, method='scrypt')
 
         # Create a new User object
         new_user = User(
@@ -54,17 +55,17 @@ def create_user(data):
         db.session.commit()
 
         # Return a success message with user details
-        return jsonify({
+        return {
             "message": "User created successfully!",
             "user": {"id": new_user.id, "username": new_user.username}
-        }), 201
+        }
 
     except Exception as e:
         # Handle unexpected errors
-        return jsonify({"error": "An error occurred while creating the user.", "details": str(e)}), 500
+        return {"error": "An error occurred while creating the user.", "details": str(e)}
 
 
-def login_user():
+def login_user(data):
     """
     Authenticate a user and return a JWT access token.
 
@@ -73,18 +74,17 @@ def login_user():
     """
     try:
         # Extract username and password from the request
-        data = request.get_json()
         username = data.get('username')
         password = data.get('password')
 
         if not username or not password:
-            return jsonify({"error": "Username and password are required."}), 400
+            return jsonify({"error": "Username and password are required."})
 
         # Fetch the user from the database
         user = User.query.filter_by(username=username).first()
 
         if not user:
-            return jsonify({"error": "Invalid username or password."}), 401
+            return jsonify({"error": "Invalid username or password."})
 
         # Validate the user's password
         if check_password_hash(user.password, password):
@@ -93,14 +93,14 @@ def login_user():
             return jsonify({
                 "message": "Login successful",
                 "access_token": access_token
-            }), 200
+            })
 
         # Invalid password
-        return jsonify({"error": "Invalid username or password."}), 401
+        return jsonify({"error": "Invalid username or password."})
 
     except Exception as e:
         # Handle unexpected errors
-        return jsonify({"error": "An error occurred while logging in.", "details": str(e)}), 500
+        return jsonify({"error": "An error occurred while logging in.", "details": str(e)})
 
 
 

@@ -1,27 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import './Dashboard.css';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "./Dashboard.css";
 
-function Dashboard({ user }) {
-  const [isLoading, setIsLoading] = useState(true); 
-  const [error, setError] = useState(null); 
+function Dashboard() {
+  const [user, setUser] = useState(null); 
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setTimeout(() => {
-      if (!user) {
-        setError('User data not available.');
-      } else {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("No token found. Please log in.");
+        }
+
+        const response = await fetch("http://127.0.0.1:5000/dashboard", {
+          headers: {
+            Authorization: `Bearer ${token}`, 
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setUser(data); 
+        setIsLoading(false);
+      } catch (err) {
+        setError(err.message);
         setIsLoading(false);
       }
-    }, 1000); 
-  }, [user]);
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleLogout = () => {
-    const confirmLogout = window.confirm('Are you sure you want to log out?');
+    const confirmLogout = window.confirm("Are you sure you want to log out?");
     if (confirmLogout) {
-      localStorage.removeItem('token'); 
-      navigate('/login'); 
+      localStorage.removeItem("token");
+      navigate("/login");
     }
   };
 
@@ -30,7 +51,7 @@ function Dashboard({ user }) {
   }
 
   if (error) {
-    return <p style={{ color: 'red' }}>{error}</p>;
+    return <p style={{ color: "red" }}>{error}</p>;
   }
 
   return (
@@ -47,3 +68,4 @@ function Dashboard({ user }) {
 }
 
 export default Dashboard;
+

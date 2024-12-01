@@ -27,6 +27,20 @@ def test():
     return jsonify({"message": "It works!"})
 
 
+@app.route("/dashboard", methods=["GET"])
+def show_dashboard():
+    """
+    Dashboard endpoint for user data.
+    Returns dummy user data or an error if no token is provided.
+    """
+    token = request.headers.get("Authorization")
+
+    if not token:
+        return jsonify({"error": "Unauthorized. Token missing."}), 401
+
+
+    return jsonify(user_data), 200
+
 # Weather Forecast Routes
 @app.route('/forecast', methods=['GET'])
 def forecast():
@@ -69,8 +83,9 @@ def real_time_forecast2():
 @cross_origin(origins="http://localhost:3000")
 def signup():
     """User Signup Endpoint."""
+    
     if request.method == 'OPTIONS':
-        return '', 204
+        return "", 204
 
     try:
         data = request.get_json()
@@ -86,23 +101,6 @@ def signup():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-def create_user(data):
-    """Handles user creation logic."""
-    username = data["username"]
-    password = data["password"]
-    first_name = data["first_name"]
-    last_name= data["last_name"]
-    local_zipcode= data["local_zipcode"]
-    new_user = User(
-        username=username, 
-        password=password, 
-        first_name=first_name, 
-        last_name= last_name, 
-        local_zipcode= local_zipcode)
-    db.session.add(new_user)
-    db.session.commit()
-
-    # Respond with a success message
     return {"success": True, "message": "User created successfully"}
 
 
@@ -110,6 +108,7 @@ def create_user(data):
 @app.route('/auth/login', methods=['POST'])
 def login():
     """Log in an existing user."""
+    
     try:
         data = request.get_json()
         if not data:

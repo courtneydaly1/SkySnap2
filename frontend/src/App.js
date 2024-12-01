@@ -9,7 +9,7 @@ import LoginForm from './auth/LoginForm';
 import SignupForm from './auth/SignupForm';
 import LoadingSpinner from './LoadingSpinner';
 
-export const TOKEN_STORAGE_ID = 'weatherApi-token';
+export const TOKEN_STORAGE_ID = 'token';
 
 function App() {
   const navigate = useNavigate();  
@@ -55,8 +55,8 @@ function App() {
     try {
       // Call the API to sign up and get the token
       let token = await WeatherApi.signup(signupData);
-      setToken(token);  // Assuming setToken saves the token in state or local storage
-      return { success: true };  // Return success if signup is successful
+      setToken(token);
+      return { success: true };  
     } catch (e) {
       console.error('Signup failed', e?.message || e);
       

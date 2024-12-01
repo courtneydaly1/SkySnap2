@@ -21,8 +21,7 @@ function LoginForm({ login }) {
     password: '' 
   });
   const [formErrors, setFormErrors] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);  // Track loading state
-
+  const [isLoading, setIsLoading] = useState(false);  
   console.debug(
     "LoginForm",
     "login=", typeof login,
