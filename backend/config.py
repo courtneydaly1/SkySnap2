@@ -9,11 +9,12 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', os.urandom(24))  
     WEATHER_API_KEY = os.environ.get('WEATHER_API_KEY')
     GEOCODING_API_KEY = os.environ.get('GEOCODING_API_KEY')
-
+    
+    
     @classmethod
     def validate_config(cls):
         """Ensure that all required environment variables are set."""
-        required_keys = ['DATABASE_URL', 'SECRET_KEY', 'WEATHER_API_KEY', 'GEOCODING_API_KEY']
+        required_keys = ['DATABASE_URL', 'SECRET_KEY', 'WEATHER_API_KEY','GEOCODING_API_KEY']
         for key in required_keys:
             if not os.environ.get(key):
                 raise ValueError(f"Missing required environment variable: {key}")
