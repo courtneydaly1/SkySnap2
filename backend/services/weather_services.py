@@ -25,7 +25,7 @@ def fetch_weather_data(endpoint: str, params: dict) -> dict:
     headers = {"accept": "application/json"}
     try:
         response = requests.get(url, headers=headers, params=params)
-        response.raise_for_status()  # Raise HTTPError for bad responses
+        response.raise_for_status()  
         return response.json()
     except requests.exceptions.RequestException as e:
         logging.error(f"Error fetching data from {endpoint}: {e}")

@@ -12,6 +12,9 @@ class User(db.Model):
     password = db.Column(db.String(10000), nullable=False)
     local_zipcode = db.Column(db.String(10), nullable=False)
     posts = db.relationship('Post', backref='user', lazy=True)
+    
+    def __repr__(self):
+        return f"<User {self.username}>"
 
 class Post(db.Model):
     __tablename__ = "post"

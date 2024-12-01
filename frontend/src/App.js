@@ -8,6 +8,8 @@ import Navigation from './Navigation';
 import LoginForm from './auth/LoginForm';
 import SignupForm from './auth/SignupForm';
 import LoadingSpinner from './LoadingSpinner';
+import Home from "./Home";
+import Dashboard from "./Dashboard"
 
 export const TOKEN_STORAGE_ID = 'token';
 
@@ -83,9 +85,18 @@ function App() {
     <div className="App">
       <UserContext.Provider value={{ currentUser, setCurrentUser }}>
         <Navigation logout={handleLogout} />
-        <Routes>
+        <Routes>  
+          {/* Home route */}
+          <Route path="/" element={<Home />} />
+          
+          {/* Login route */}
           <Route path="/login" element={<LoginForm login={login} />} />
+          
+          {/* Signup route */}
           <Route path="/signup" element={<SignupForm signup={signup} />} />
+
+          {/* Dashboard route */}
+          <Route path="/dashboard" element={<Dashboard user={currentUser} />} />
         </Routes>
       </UserContext.Provider>
     </div>

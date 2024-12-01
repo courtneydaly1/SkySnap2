@@ -5,7 +5,7 @@ import UserContext from "./auth/UserContext";
 
 function Home() {
   const { currentUser } = useContext(UserContext);
-  console.debug("Homepage", "currentUser=", currentUser);
+  
 
   return (
     <div className="home-container">

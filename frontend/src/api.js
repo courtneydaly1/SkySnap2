@@ -28,12 +28,15 @@ class WeatherApi {
         data,
         params,
         headers,
-        timeout: 5000,  // Adding a 5-second timeout
+        timeout: 10000,  // Adding a 10-second timeout
       });
       return response.data;
     } catch (err) {
+      console.debug("API Call Details:", { url, method, data, params, headers });
       console.error("API Error:", err.response || err);
-      let message = "An error occurred"; 
+      let message = "An error occurred";
+      
+
 
       if (err.response) {
         message = err.response?.data?.error?.message || err.response?.data?.message || message;

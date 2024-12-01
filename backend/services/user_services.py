@@ -23,7 +23,7 @@ def create_user(data):
         local_zipcode = data.get('local_zipcode')
         password = data.get('password')
 
-        # return ("hello world")
+       
         # Validate the input
         if not username:
             return jsonify({"error": "Username is required."})
@@ -90,10 +90,10 @@ def login_user(data):
         if check_password_hash(user.password, password):
             # Generate a JWT access token with an optional expiration time (e.g., 24 hours)
             access_token = create_access_token(identity=user.id, expires_delta=False)
-            return jsonify({
+            return {
                 "message": "Login successful",
                 "access_token": access_token
-            })
+            }
 
         # Invalid password
         return jsonify({"error": "Invalid username or password."})

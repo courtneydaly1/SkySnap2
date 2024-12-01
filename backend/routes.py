@@ -18,7 +18,7 @@ from models import Post
 @app.route('/', methods=['GET'])
 def home():
     """Home route."""
-    return jsonify({"message": "Welcome to SkySnap!"})
+    return  "Welcome to SkySnap!"
 
 
 @app.route('/test', methods=['GET'])
@@ -98,6 +98,7 @@ def signup():
         
         response = create_user(data=data)
         return jsonify(response), 201
+    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
