@@ -56,7 +56,7 @@ function Dashboard() {
 
   return (
     <div className="dashboard-container">
-      <h1 className="dashboard-title">Welcome, {user?.first_name || "User"}!</h1>
+      <h1 className="dashboard-title">Welcome, {user?.username || "User"}!</h1>
       <p className="dashboard-subtitle">You are logged in to SkySnap.</p>
       <div className="dashboard-links">
         <Link to="/weather" className="dashboard-link-button">View Weather</Link>

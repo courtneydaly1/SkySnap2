@@ -3,7 +3,7 @@ from datetime import datetime
 from app import app, db
 
 class User(db.Model):
-    __tablename__ = "user"
+    __tablename__ = "users"
     
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -11,10 +11,12 @@ class User(db.Model):
     last_name = db.Column(db.String(40), nullable=False)
     password = db.Column(db.String(10000), nullable=False)
     local_zipcode = db.Column(db.String(10), nullable=False)
-    posts = db.relationship('Post', backref='user', lazy=True)
+    posts = db.relationship('Post', backref='users', lazy=True)
+    
     
     def __repr__(self):
         return f"<User {self.username}>"
+
 
 class Post(db.Model):
     __tablename__ = "post"
@@ -23,7 +25,7 @@ class Post(db.Model):
     location = db.Column(db.String(120), nullable=False)
     description = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     image_url = db.Column(db.String(200))
     caption = db.Column(db.String(300))
     realtime_weather_id = db.Column(db.Integer, db.ForeignKey('realtime_weather.id'))

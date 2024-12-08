@@ -69,7 +69,7 @@ class WeatherApi {
   /** Login a user. */
   static async login(data) {
     let res = await this.request("auth/login", data, "post");
-    return res.token;
+    return res.access_token;
   }
 
   /** Fetch all posts. */

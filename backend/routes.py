@@ -11,7 +11,9 @@ from services.weather_services import (
 )
 from services.post_services import create_post
 from services.user_services import create_user, login_user
-from models import Post
+from models import Post, User, Media, WeeklyWeather, DailyWeather, RealtimeWeather
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
+
 
 
 # Base Routes
@@ -28,18 +30,36 @@ def test():
 
 
 @app.route("/dashboard", methods=["GET"])
+@jwt_required()
 def show_dashboard():
     """
     Dashboard endpoint for user data.
     Returns dummy user data or an error if no token is provided.
     """
-    token = request.headers.get("Authorization")
+      # Get the current user's identity from the JWT
+    # current_user_id = get_jwt_identity()
+    username = get_jwt_identity()
 
-    if not token:
-        return jsonify({"error": "Unauthorized. Token missing."}), 401
+    # Fetch user data from the database based on user_id
+    # user_data = User.query.filter_by(id=current_user_id).first()
+    user = User.query.filter_by(username=username).first()
 
+    if user:
+        return {"username": user.username, "first_name": user.first_name, "local_zipcode": user.local_zipcode}
+    else:
+        return {"error": "User not found."}, 404
+    if not user_data:
+        return {"error": "User not found"}, 404
 
-    return jsonify(user_data), 200
+    # Serialize the user data (modify as needed based on your model)
+    serialized_data = {
+        "id": user_data.id,
+        "username": user_data.username,
+        # "email": user_data.email
+        # Add other user attributes as necessary
+    }
+
+    return jsonify(serialized_data), 200
 
 # Weather Forecast Routes
 @app.route('/forecast', methods=['GET'])

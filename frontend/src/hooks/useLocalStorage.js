@@ -37,7 +37,7 @@ function useLocalStorage(key, firstValue = null) {
     if (item === null) {
       localStorage.removeItem(key);
     } else {
-      localStorage.setItem(key, JSON.stringify(item));  
+      localStorage.setItem(key, item);  
     }
   }, [key, item]);
 

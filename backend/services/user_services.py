@@ -78,29 +78,36 @@ def login_user(data):
         password = data.get('password')
 
         if not username or not password:
-            return jsonify({"error": "Username and password are required."})
+            return {"error": "Username and password are required."}
 
         # Fetch the user from the database
         user = User.query.filter_by(username=username).first()
 
         if not user:
-            return jsonify({"error": "Invalid username or password."})
+            return {"error": "Invalid username or password."}
 
         # Validate the user's password
         if check_password_hash(user.password, password):
             # Generate a JWT access token with an optional expiration time (e.g., 24 hours)
-            access_token = create_access_token(identity=user.id, expires_delta=False)
+            access_token = create_access_token(identity=user.username, expires_delta=False)
+            # access_token = create_access_token(
+            #     identity=user.username,  # Only store the username as identity
+            #     additional_claims={"user_id": user.id, "local_zipcode": user.local_zipcode},
+            #     expires_delta=timedelta(hours=24)
+            # )
+
+
             return {
                 "message": "Login successful",
                 "access_token": access_token
             }
 
         # Invalid password
-        return jsonify({"error": "Invalid username or password."})
+        return {"error": "Invalid username or password."}
 
     except Exception as e:
         # Handle unexpected errors
-        return jsonify({"error": "An error occurred while logging in.", "details": str(e)})
+        return {"error": "An error occurred while logging in.", "details": str(e)}
 
 
 
