@@ -1,4 +1,5 @@
 from flask import Flask, request, make_response
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
@@ -26,7 +27,6 @@ def add_security_headers(response):
 with app.app_context():
     db.create_all()  # Make sure your DB is set up
    
-
 # Main entry point for app
 if __name__ == '__main__':
     with app.app_context():

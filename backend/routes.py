@@ -33,24 +33,13 @@ def show_dashboard():
     Dashboard endpoint for user data.
     Returns dummy user data or an error if no token is provided.
     """
-      # Get the current user's identity from the JWT
-    current_user_id = get_jwt_identity()
+    token = request.headers.get("Authorization")
 
-    # Fetch user data from the database based on user_id
-    user_data = User.query.filter_by(id=current_user_id).first()
+    if not token:
+        return jsonify({"error": "Unauthorized. Token missing."}), 401
 
-    if not user_data:
-        return jsonify({"error": "User not found"}), 404
 
-    # Serialize the user data (modify as needed based on your model)
-    serialized_data = {
-        "id": user_data.id,
-        "username": user_data.username,
-        "email": user_data.email
-        # Add other user attributes as necessary
-    }
-
-    return jsonify(serialized_data), 200
+    return jsonify(user_data), 200
 
 # Weather Forecast Routes
 @app.route('/forecast', methods=['GET'])
