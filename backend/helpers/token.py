@@ -2,7 +2,7 @@ import jwt
 import os
 from datetime import datetime, timedelta
 
-def create_jwt_token(user_id):
+def create_jwt_token(user_id, username):
     """
     Create a JWT token for user authentication.
 
@@ -14,6 +14,7 @@ def create_jwt_token(user_id):
     """
     payload = {
         'user_id': user_id,
+        'username': username,
         'exp': datetime.utcnow() + timedelta(days=1)  # Token expires in 1 day
     }
     secret = os.getenv('SECRET_KEY')  # Get the secret key from environment variables

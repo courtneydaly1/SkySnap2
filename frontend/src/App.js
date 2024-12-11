@@ -27,7 +27,8 @@ function App() {
         try {
           // Decode the token to get the username
           const decodedToken = jwt.decode(token);
-          if (decodedToken && decodedToken.username) {
+          console.log(decodedToken)
+          if (decodedToken) {
             WeatherApi.token = token;
             const currentUser = await WeatherApi.getCurrentUser(decodedToken.username);
             setCurrentUser(currentUser);
