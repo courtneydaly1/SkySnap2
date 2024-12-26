@@ -10,6 +10,7 @@ import SignupForm from './auth/SignupForm';
 import LoadingSpinner from './LoadingSpinner';
 import Home from "./Home";
 import Dashboard from "./Dashboard"
+import WeatherPage from './WeatherPage';
 
 export const TOKEN_STORAGE_ID = 'token';
 
@@ -18,6 +19,7 @@ function App() {
   const [infoLoaded, setInfoLoaded] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useLocalStorage(TOKEN_STORAGE_ID);
+  const [user, setUser] = useLocalStorage('user');
 
   useEffect(() => {
     console.debug('App useEffect loadUserInfo', 'token=', token);
@@ -30,8 +32,9 @@ function App() {
           console.log(decodedToken)
           if (decodedToken) {
             WeatherApi.token = token;
-            const currentUser = await WeatherApi.getCurrentUser(decodedToken.username);
-            setCurrentUser(currentUser);
+            // const currentUser = await WeatherApi.getCurrentUser(decodedToken.sub);
+            // debugger;
+            // setCurrentUser(currentUser);
           } else {
             console.error('Invalid token: no username found.');
             setCurrentUser(null);
@@ -71,8 +74,10 @@ function App() {
 
   async function login(loginData) {
     try {
-      let token = await WeatherApi.login(loginData);
-      setToken(token);
+      let response = await WeatherApi.login(loginData);
+      setToken(response.access_token);
+      setUser(JSON.stringify(response));
+      setCurrentUser(response);
       return { success: true };
     } catch (e) {
       console.error('login failed', e?.message || e);
@@ -98,6 +103,9 @@ function App() {
 
           {/* Dashboard route */}
           <Route path="/dashboard" element={<Dashboard user={currentUser} />} />
+
+          {/* Weather Page route */}
+          <Route path="/weather/:zipcode" element={<WeatherPage />} />
         </Routes>
       </UserContext.Provider>
     </div>

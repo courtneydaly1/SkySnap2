@@ -1,53 +1,84 @@
 .dashboard-container {
-    text-align: center;
-    margin-top: 50px;
-    font-family: Arial, sans-serif;
-  }
-  
-  .dashboard-title {
-    font-size: 2.5rem;
-    color: #2c3e50;
-  }
-  
-  .dashboard-subtitle {
-    margin: 10px 0;
-    font-size: 1.2rem;
-    color: #7f8c8d;
-  }
-  
-  .dashboard-links {
-    margin: 20px 0;
-  }
-  
-  .dashboard-link-button {
-    display: inline-block;
-    margin: 10px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    color: white;
-    background-color: #3498db;
-    border-radius: 5px;
-    text-decoration: none;
-    transition: background-color 0.3s;
-  }
-  
-  .dashboard-link-button:hover {
-    background-color: #2980b9;
-  }
-  
-  .logout-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    color: white;
-    background-color: #e74c3c;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .logout-button:hover {
-    background-color: #c0392b;
-  }
-  
+  text-align: center;
+  margin-top: 50px;
+  font-family: Arial, sans-serif;
+}
+
+.dashboard-title {
+  font-size: 2.5rem;
+  color: #2c3e50;
+}
+
+.dashboard-subtitle {
+  margin: 10px 0;
+  font-size: 1.2rem;
+  color: #222323;
+}
+
+.dashboard-links {
+  margin: 20px 0;
+}
+
+.dashboard-link-button {
+  display: inline-block;
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  color: white;
+  background-color: #3498db;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.dashboard-link-button:hover {
+  background-color: #2980b9;
+}
+
+.logout-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  color: white;
+  background-color: #e74c3c;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+  background-color: #f14734;
+}
+
+
+.zipcode-button {
+  margin: 15px 0;
+  padding: 10px 20px;
+  font-size: 1rem;
+  color: white;
+  background-color: #27ae60;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.zipcode-button:hover {
+  background-color: #229954;
+  transform: scale(1.05);
+}
+
+.zipcode-input {
+  margin-right: 10px;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #bdc3c7;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.zipcode-input:focus {
+  border-color: #3498db;
+}

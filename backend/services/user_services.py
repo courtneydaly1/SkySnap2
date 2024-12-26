@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 from models import User
 from flask_jwt_extended import create_access_token
+from datetime import timedelta
 
 
 def create_user(data):
@@ -89,7 +90,7 @@ def login_user(data):
         # Validate the user's password
         if check_password_hash(user.password, password):
             # Generate a JWT access token with an optional expiration time (e.g., 24 hours)
-            access_token = create_access_token(identity=user.username, expires_delta=False)
+            access_token = create_access_token(identity=user.username, expires_delta=timedelta(hours=24))
             # access_token = create_access_token(
             #     identity=user.username,  # Only store the username as identity
             #     additional_claims={"user_id": user.id, "local_zipcode": user.local_zipcode},
@@ -99,7 +100,11 @@ def login_user(data):
 
             return {
                 "message": "Login successful",
-                "access_token": access_token
+                "access_token": access_token,
+                "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "local_zipcode": user.local_zipcode
             }
 
         # Invalid password

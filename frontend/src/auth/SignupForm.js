@@ -47,7 +47,7 @@ function SignupForm({ signup }) {
       const result = await signup(formData);
       console.log(result)
       if (result.success) {
-        navigate("/dashboard");
+        navigate("/login?success=true") 
       } else {
         setFieldErrors(result.errors || []);
       }

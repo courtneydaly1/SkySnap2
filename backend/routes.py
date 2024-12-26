@@ -2,13 +2,7 @@ from app import app, db
 from flask import jsonify, request
 from flask_cors import cross_origin
 import json
-from services.weather_services import (
-    fetch_weather_data,
-    save_weather_data,
-    get_realtime_forecast,
-    get_daily_forecast,
-    get_weather_history,
-)
+from services.weather_services import *
 from services.post_services import create_post
 from services.user_services import create_user, login_user
 from models import Post, User, Media, WeeklyWeather, DailyWeather, RealtimeWeather
@@ -16,6 +10,7 @@ from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 
 
 
+    
 # Base Routes
 @app.route('/', methods=['GET'])
 def home():
@@ -27,76 +22,6 @@ def home():
 def test():
     """Test route to verify API is working."""
     return jsonify({"message": "It works!"})
-
-
-@app.route("/dashboard", methods=["GET"])
-@jwt_required()
-def show_dashboard():
-    """
-    Dashboard endpoint for user data.
-    Returns dummy user data or an error if no token is provided.
-    """
-      # Get the current user's identity from the JWT
-    # current_user_id = get_jwt_identity()
-    username = get_jwt_identity()
-
-    # Fetch user data from the database based on user_id
-    # user_data = User.query.filter_by(id=current_user_id).first()
-    user = User.query.filter_by(username=username).first()
-
-    if user:
-        return {"username": user.username, "first_name": user.first_name, "local_zipcode": user.local_zipcode}
-    else:
-        return {"error": "User not found."}, 404
-    if not user_data:
-        return {"error": "User not found"}, 404
-
-    # Serialize the user data (modify as needed based on your model)
-    serialized_data = {
-        "id": user_data.id,
-        "username": user_data.username,
-        # "email": user_data.email
-        # Add other user attributes as necessary
-    }
-
-    return jsonify(serialized_data), 200
-
-# Weather Forecast Routes
-@app.route('/forecast', methods=['GET'])
-def forecast():
-    """Retrieve daily weather forecast."""
-    try:
-        return jsonify(get_daily_forecast())
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route('/forecast/current', methods=['GET'])
-def current_forecast():
-    """Retrieve current weather forecast."""
-    try:
-        return jsonify(get_current_forecast())
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route('/forecast/realtime', methods=['GET'])
-def real_time_forecast():
-    """Retrieve real-time weather forecast."""
-    try:
-        return jsonify(get_realtime())
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route('/forecast/realtime2', methods=['GET'])
-def real_time_forecast2():
-    """Retrieve alternative real-time weather forecast."""
-    try:
-        return jsonify(get_realtime_forecast())
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
 
 # User Routes
 @app.route('/auth/signup', methods=['POST', 'OPTIONS'])
@@ -144,7 +69,45 @@ def login():
         return jsonify({"error": str(e)}), 500
 
 
-# Post Routes
+@app.route("/dashboard", methods=["GET"])
+@jwt_required()
+def show_dashboard():
+    username = get_jwt_identity()
+    user = User.query.filter_by(username=username).first()
+
+    if not user:
+        return jsonify({"error": "User not found."}), 404
+
+    zipcode = user.local_zipcode
+    if not zipcode:
+        return jsonify({"error": "User's ZIP code is not set"}), 400
+
+    # Fetch weather data and update the RealtimeWeather table
+    try:
+        weather_data = fetch_and_store_weather(zipcode)
+    except Exception as e:
+        weather_data = {"error": f"Failed to fetch weather data: {str(e)}"}
+
+    # Fetch posts related to the user's ZIP code
+    try:
+        posts = Post.query.filter_by(location=zipcode).all()
+        posts_data = [post.serialize() for post in posts]
+    except Exception as e:
+        posts_data = {"error": f"Unable to fetch posts: {str(e)}"}
+
+    dashboard_data = {
+        "user": {
+            "username": user.username,
+            "first_name": user.first_name,
+            "local_zipcode": user.local_zipcode,
+        },
+        "weather_forecast": weather_data,
+        "posts": posts_data,
+    }
+
+    return jsonify(dashboard_data), 200
+
+############################## Post Routes
 @app.route('/posts', methods=['GET'])
 def get_posts():
     """Retrieve all posts."""
@@ -172,4 +135,116 @@ def create_new_post():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+
+
+
+#################### Weather Forecast Routes
+@app.route('/forecast', methods=['GET'])
+def forecast():
+    """Retrieve daily weather forecast."""
+    try:
+        return jsonify(get_daily_forecast())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/current', methods=['GET'])
+def current_forecast():
+    """Retrieve current weather forecast."""
+    try:
+        return jsonify(get_current_forecast())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/realtime', methods=['GET'])
+def real_time_forecast():
+    """Retrieve real-time weather forecast."""
+    try:
+        return jsonify(get_realtime())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/realtime2', methods=['GET'])
+def real_time_forecast2():
+    """Retrieve alternative real-time weather forecast."""
+    try:
+        return jsonify(get_realtime_forecast())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/weather', methods=['GET'])
+@jwt_required()
+def get_user_forecast():
+    """
+    Fetch and return the 1-day forecast for the logged-in user's local ZIP code.
+    """
+    username = get_jwt_identity()
+    user = User.query.filter_by(username=username).first()
+
+    if not user:
+        return jsonify({"error": "User not found."}), 404
+
+    zipcode = user.local_zipcode
+    if not zipcode or len(zipcode) != 5:
+        return jsonify({"error": "Invalid or missing ZIP code for the user."}), 400
+
+    params = {
+        'location': zipcode,
+        'timesteps': '1d',
+        'units': 'imperial',
+        'apikey': WEATHER_API_KEY
+    }
+
+    try:
+        data = fetch_weather_data("forecast", params)
+        forecast_entries = data['timelines']['daily']
+
+        formatted_forecast = [
+            {
+                "date": entry.get('time'),
+                "temperatureHigh": entry['values'].get('temperatureMax'),
+                "temperatureLow": entry['values'].get('temperatureMin'),
+                "temperatureApparent": entry['values'].get('temperatureApparentAvg'),
+                "humidity": entry['values'].get('humidityAvg'),
+                "precipitation": entry['values'].get('precipitationProbabilityAvg'),
+                "sunrise": entry['values'].get('sunriseTime'),
+                "sunset": entry['values'].get('sunsetTime'),
+                "uvIndex": entry['values'].get('uvIndexAvg'),
+                "visibility": entry['values'].get('visibilityAvg'),
+                "windSpeed": entry['values'].get('windSpeedAvg'),
+                "cloudBase": entry['values'].get('cloudBaseAvg'),
+            
+                
+            }
+            for entry in forecast_entries
+        ]
+
+        return jsonify({
+            "forecast": formatted_forecast
+        })
+    except Exception as e:
+        return jsonify({"error": f"Failed to fetch weather data: {str(e)}"}), 500
+
+
+@app.route('/weather/:zipcode', methods=['GET'])
+def get_forecast_by_zipcode():
+    """
+    Retrieve weather data for a specific ZIP code.
+    """
+    data = request.json
+    zipcode = data.get('zipcode')
+
+    if not zipcode:
+        return jsonify({"error": "Missing ZIP code"}), 400
+
+    try:
+        weather_data = handleZipcode(zipcode)
+        return (
+            weather_data if isinstance(weather_data, Response) else jsonify(weather_data)
+        )
+    except Exception as e:
+        return jsonify({"error": f"Failed to fetch weather data: {str(e)}"}), 500
 

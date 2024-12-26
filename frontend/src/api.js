@@ -69,7 +69,7 @@ class WeatherApi {
   /** Login a user. */
   static async login(data) {
     let res = await this.request("auth/login", data, "post");
-    return res.access_token;
+    return res;
   }
 
   /** Fetch all posts. */
@@ -84,15 +84,15 @@ class WeatherApi {
     return res.post;
   }
 
-  /** Fetch real-time weather by location (latitude and longitude). */
-  static async getRealtimeWeather(lat, lon) {
-    let res = await this.request("weather/realtime", { lat, lon });
+  /** Fetch real-time weather by location . */
+  static async getRealtimeWeather(location) {
+    let res = await this.request("weather/realtime", { location });
     return res.weather;
   }
 
-  /** Fetch weekly weather forecast by location (latitude and longitude). */
-  static async getWeeklyWeather(lat, lon) {
-    let res = await this.request("weather/weekly", { lat, lon });
+  /** Fetch weekly weather forecast by location ). */
+  static async getWeeklyWeather(location) {
+    let res = await this.request("weather/weekly", { location });
     return res.weather;
   }
 

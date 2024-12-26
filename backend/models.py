@@ -74,15 +74,16 @@ class DailyWeather(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.DateTime, nullable=False)
     location_name = db.Column(db.String(100), nullable=False)
-    lat = db.Column(db.Float, nullable=False)
-    lon = db.Column(db.Float, nullable=False)
-    temperature = db.Column(db.Float)
+    temperatureLow = db.Column(db.Float)
+    temperatureHigh = db.Column(db.Float)
     temperatureApparent = db.Column(db.Float)
-    precipitationProbability = db.Column(db.Float)
+    precipitation = db.Column(db.Float)
     humidity = db.Column(db.Float)
-    cloudCover = db.Column(db.Float)
+    cloudBase = db.Column(db.Float)
     uvIndex = db.Column(db.Float)
     windSpeed = db.Column(db.Float)
+    visibility = db.Column(db.DateTime)
+    sunset = db.Column(db.DateTime)
     weekly_weather_id = db.Column(db.Integer, db.ForeignKey('weekly_weather.id'))
 
     def __repr__(self):
@@ -111,7 +112,24 @@ class RealtimeWeather(db.Model):
     visibility = db.Column(db.Float)
     posts = db.relationship('Post', backref='realtime_weather')
 
-    def __repr__(self):
-        return f"<RealtimeWeather {self.location_name} at {self.time}>"
-
+    def serialize(self):
+        return {
+            "time": self.time.isoformat(),
+            "location_name": self.location_name,
+            "lat": self.lat,
+            "lon": self.lon,
+            "cloudBase": self.cloudBase,
+            "cloudCeiling": self.cloudCeiling,
+            "cloudCover": self.cloudCover,
+            "dewPoint": self.dewPoint,
+            "humidity": self.humidity,
+            "precipitationProbability": self.precipitationProbability,
+            "pressureSurfaceLevel": self.pressureSurfaceLevel,
+            "temperature": self.temperature,
+            "windSpeed": self.windSpeed,
+            "windDirection": self.windDirection,
+            "uvIndex": self.uvIndex,
+            "weatherCode": self.weatherCode,
+            "visibility": self.visibility,
+        }
 

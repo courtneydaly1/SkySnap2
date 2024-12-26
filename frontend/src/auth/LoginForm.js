@@ -21,7 +21,9 @@ function LoginForm({ login }) {
     password: '' 
   });
   const [formErrors, setFormErrors] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);  
+  const [isLoading, setIsLoading] = useState(false);
+  const urlParams = new URLSearchParams(window.location.search);
+  const success = urlParams.get('success');  
   console.debug(
     "LoginForm",
     "login=", typeof login,
@@ -56,6 +58,13 @@ function LoginForm({ login }) {
 
   return (
     <div className="login-container">
+       <div>
+      {success === 'true' && (
+        <div className="success-message">
+          Created successfully!
+        </div>
+      )}
+    </div>
       <h2 className="login-title">Login</h2>
       <form onSubmit={handleSubmit} className="login-form">
         <input
