@@ -110,31 +110,85 @@ def show_dashboard():
 ############################## Post Routes
 @app.route('/posts', methods=['GET'])
 def get_posts():
-    """Retrieve all posts."""
+    """Retrieve all posts for the user's zip code."""
     try:
-        posts = Post.query.all()
+        zip_code = request.args.get('zip_code')  # Get zip code from the query params
+
+        if not zip_code:
+            return jsonify({"error": "Zip code is required"}), 400
+
+        # Fetch posts for that zip code from users having the same zip code
+        posts = Post.query.join(User).filter(User.local_zipcode == zip_code).all()
+
+        if not posts:
+            return jsonify({"message": "No posts found for this zip code."}), 404
+        
         return jsonify([post.serialize() for post in posts])
+
     except Exception as e:
+        app.logger.error(f"Error retrieving posts: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
 
 
 @app.route('/posts/create', methods=['POST'])
 def create_new_post():
     """Create a new post."""
     try:
+        # Get JSON data from the request
         data = request.get_json()
+
+        # Validate JSON payload
         if not data:
             return jsonify({"error": "Invalid JSON payload"}), 400
-        
+
         # Validate required fields
         if not data.get("location") or not data.get("user_id"):
-            return jsonify({"error": "Missing required fields"}), 400
-        
-        post = create_post(data=data)
-        return jsonify(post), 201
+            return jsonify({"error": "Missing required fields: location, user_id"}), 400
+
+        # Optionally, validate other fields like 'content'
+        if not data.get("content"):
+            return jsonify({"error": "Missing required field: content"}), 400
+
+        # Call the helper function to create the post
+        post = create_post(data)
+
+        # Return the created post with a 201 status code
+        return jsonify(post.serialize()), 201
     except Exception as e:
+        app.logger.error(f"Error creating post: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+
+def create_post(data):
+    """Helper function to create a new post."""
+    try:
+        post = Post(
+            location=data.get("location"),
+            description=data.get("description"),
+            user_id=data.get("user_id"),
+            image_url=data.get("image_url", ""), 
+            caption=data.get("caption", ""),      
+            realtime_weather_id=data.get("realtime_weather_id") 
+        )
+        db.session.add(post)
+        db.session.commit()
+        
+        # Optionally handle media attachments if provided
+        if data.get("media"):
+            for media_data in data["media"]:
+                media = Media(
+                    media_url=media_data["media_url"],
+                    post_id=post.id
+                )
+                db.session.add(media)
+        
+        return post
+        
+    except Exception as e:
+        db.session.rollback()  # Rollback in case of failure
+        app.logger.error(f"Error in create_post: {str(e)}")
+        raise
 
 
 

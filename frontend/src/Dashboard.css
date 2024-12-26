@@ -51,7 +51,6 @@
   background-color: #f14734;
 }
 
-
 .zipcode-button {
   margin: 15px 0;
   padding: 10px 20px;
@@ -82,3 +81,87 @@
 .zipcode-input:focus {
   border-color: #3498db;
 }
+
+
+/* Container for the forecast cards */
+.forecast-container {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.forecast-cards {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); /* 6 cards per row */
+  gap: 15px;
+  justify-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.forecast-card {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 180px; /* Smaller card width */
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+/* Hover effect for the forecast cards */
+.forecast-card:hover {
+  transform: translateY(-5px);
+
+}
+
+.forecast-card h3 {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 10px;
+
+}
+
+.forecast-card .weather-data {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 10px;
+
+}
+
+.forecast-card li {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 6px;
+
+}
+
+/* Different card colors based on the weather */
+.forecast-card:nth-child(odd) {
+  background-color: #ff7f50; /* Coral for odd cards */
+}
+
+.forecast-card:nth-child(even) {
+  background-color: #ff6347; /* Tomato for even cards */
+}
+
+.forecast-card:nth-child(3n) {
+  background-color: #f39c12; /* Golden for every third card */
+}
+
+.forecast-card:nth-child(4n) {
+  background-color: #1abc9c; /* Turquoise for every fourth card */
+}
+
+.forecast-card:nth-child(5n) {
+  background-color: #9b59b6; /* Purple for every fifth card */
+}
+
+.forecast-card:nth-child(6n) {
+  background-color: #2980b9; /* Blue for every sixth card */
+}
+
+.forecast-card li span {
+  font-weight: bold;
+}
+
+

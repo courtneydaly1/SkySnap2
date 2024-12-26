@@ -1,0 +1,14 @@
+.create-post-button,
+.back-to-dashboard-button {
+  padding: 10px 20px;
+  margin: 10px;
+  background-color: #27ae60;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.create-post-button:hover,
+.back-to-dashboard-button:hover {
+  background-color: #229954;
+}

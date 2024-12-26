@@ -65,7 +65,7 @@ def get_daily_forecast() -> dict:
         logging.error(e)
         return jsonify({"error": str(e)}), 400
 
-    params = {'location': zipcode, 'timestep': '1d', 'apikey': WEATHER_API_KEY}
+    params = {'location': zipcode, 'timestep': '1d', 'apikey': WEATHER_API_KEY, 'units': 'imperial'}
     data = fetch_weather_data("forecast", params)
 
     if not data or 'timelines' not in data or 'daily' not in data['timelines']:
@@ -73,7 +73,7 @@ def get_daily_forecast() -> dict:
         return None
 
     forecast_entries = data['timelines']['daily']
-    location_data = {"name": f"ZIP {zipcode}", "lat": None, "lon": None}
+    location_data = {"name": f"ZIP {zipcode}"}
     save_weather_data(forecast_entries, DailyWeather, location_data, "daily")
     return data
 

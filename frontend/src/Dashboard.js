@@ -47,7 +47,6 @@ function Dashboard() {
 
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
       const data = await response.json();
-      debugger;
       setForecast(data.forecast);
     } catch (err) {
       setError(err.message);
@@ -80,22 +79,26 @@ function Dashboard() {
       {forecast && (
         <div className="forecast-container">
           <h2>5-Day Forecast for ZIP: {user.local_zipcode}</h2>
-          <ul>
+          <div className="forecast-cards">
             {forecast.map((day, index) => (
-              <li key={index}>
-                {new Date(day.date).toLocaleDateString()}: High: {day.temperatureHigh}°F, Low: {day.temperatureLow}°F,
-                Apparent Temp.: {day.temperatureApparent}°F,
-                Humidity: {day.humidity}%,
-                Precipitation: {day.precipitation}%,
-                Sunrise: {day.sunrise},
-                Sunset:{day.sunsetTime},
-                UVIndex": {day.uvIndex},
-                Visibility: {day.visibility},
-                Windspeed: {day.windSpeed},
-                CloudBase: {day.cloudBase},
-              </li>
+              <div className="forecast-card" key={index}>
+                <h3>{new Date(day.date).toLocaleDateString()}</h3>
+                <div className="weather-data">
+                  <p><span>High:</span> {day.temperatureHigh}°F</p>
+                  <p><span>Low:</span> {day.temperatureLow}°F</p>
+                  <p><span>Feels:</span> {day.temperatureApparent}°F</p>
+                  <p><span>Humidity:</span> {day.humidity}%</p>
+                  <p><span>Precipitation:</span> {day.precipitation}%</p>
+                  <p><span>Sunrise:</span> {day.sunriseTime}</p>
+                  <p><span>Sunset:</span> {day.sunsetTime}</p>
+                  <p><span>UV Index:</span> {day.uvIndex}</p>
+                  <p><span>Visibility:</span> {day.visibility}</p>
+                  <p><span>Windspeed:</span> {day.windSpeed} mph</p>
+                  <p><span>Cloud Base:</span> {day.cloudBase} feet</p>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
 
@@ -107,6 +110,7 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
 
 
 

@@ -11,7 +11,7 @@ class User(db.Model):
     last_name = db.Column(db.String(40), nullable=False)
     password = db.Column(db.String(10000), nullable=False)
     local_zipcode = db.Column(db.String(10), nullable=False)
-    posts = db.relationship('Post', backref='users', lazy=True)
+    posts = db.relationship('Post', backref='user', lazy=True)
     
     
     def __repr__(self):
@@ -57,12 +57,20 @@ class Media(db.Model):
     media_url = db.Column(db.String(255), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
 
+    def serialize(self):
+        """Serialize media into a dictionary for JSON response."""
+        return {
+            'id': self.id,
+            'media_url': self.media_url,
+            'post_id': self.post_id
+        }
+        
 class WeeklyWeather(db.Model):
     __tablename__ = "weekly_weather"
     
     id = db.Column(db.Integer, primary_key=True)
-    location = db.Column(db.String(100))  # e.g., City or lat/lon
-    week_start_date = db.Column(db.Date)  # Start of the week (Monday)
+    location = db.Column(db.String(100))  
+    week_start_date = db.Column(db.Date) 
     forecast = db.relationship('DailyWeather', backref='weekly_weather', lazy=True)
 
     def __repr__(self):
