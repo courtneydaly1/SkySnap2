@@ -47,7 +47,11 @@ def signup():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-    return {"success": True, "message": "User created successfully"}
+    return jsonify({
+        "message": "User created successfully!",
+        "user": {"id": new_user.id, "username": new_user.username}
+        }), 201
+
 
 
 
@@ -108,28 +112,59 @@ def show_dashboard():
     return jsonify(dashboard_data), 200
 
 ############################## Post Routes
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
 @app.route('/posts', methods=['GET'])
+@jwt_required()  # Ensure the user is logged in
 def get_posts():
-    """Retrieve all posts for the user's zip code."""
+    """Retrieve posts with pagination (for infinite scrolling)."""
     try:
-        zip_code = request.args.get('zip_code')  # Get zip code from the query params
+        # Get the logged-in user from the JWT token
+        current_user = get_jwt_identity()
+        user = User.query.filter_by(username=current_user).first()
 
+        if not user:
+            return jsonify({"error": "User not found."}), 404
+
+        # Check if the user has a ZIP code
+        zip_code = user.local_zipcode
         if not zip_code:
-            return jsonify({"error": "Zip code is required"}), 400
+            return jsonify({
+                "error": "You must set a ZIP code to view posts.",
+                "set_zip_button": {
+                    "text": "Set Your ZIP Code",
+                    "url": "/profile/set-zipcode"  # URL to update the user's profile with a ZIP code
+                }
+            }), 400
 
-        # Fetch posts for that zip code from users having the same zip code
-        posts = Post.query.join(User).filter(User.local_zipcode == zip_code).all()
+        # If the user has a ZIP code, get the pagination params
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 10, type=int)
 
-        if not posts:
-            return jsonify({"message": "No posts found for this zip code."}), 404
-        
-        return jsonify([post.serialize() for post in posts])
+        # Query posts for that ZIP code and paginate
+        posts_query = Post.query.filter(Post.location == zip_code).paginate(page, per_page, False)
+
+        if not posts_query.items:
+            return jsonify({
+                "message": "No posts yet.",
+                "create_post_button": {
+                    "text": "Create a Post",
+                    "url": "/posts/create"
+                }
+            }), 404
+
+        # Prepare the posts data (include media if any)
+        posts_data = []
+        for post in posts_query.items:
+            post_data = post.serialize()
+            post_data["media"] = [media.serialize() for media in post.media]  # Including media data
+            posts_data.append(post_data)
+
+        return jsonify(posts_data)
 
     except Exception as e:
         app.logger.error(f"Error retrieving posts: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
-
 
 @app.route('/posts/create', methods=['POST'])
 def create_new_post():

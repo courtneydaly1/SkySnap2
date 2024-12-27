@@ -9,11 +9,15 @@ function Navigation({ isLoggedIn, logout }) {
       </NavLink>
       {!isLoggedIn && (
         <>
-          <NavLink to="/login" style={linkStyle} activestyle={activeLinkStyle}>
-            Login
+         
+          <NavLink to="/dashboard" style={linkStyle} activestyle={activeLinkStyle}>
+            My Dashboard
           </NavLink>
-          <NavLink to="/signup" style={linkStyle} activestyle={activeLinkStyle}>
-            Signup
+          <NavLink to="/posts" style={linkStyle} activestyle={activeLinkStyle}>
+            My Posts
+          </NavLink>
+          <NavLink to="/weather" style={linkStyle} activestyle={activeLinkStyle}>
+            Find Weather
           </NavLink>
         </>
       )}

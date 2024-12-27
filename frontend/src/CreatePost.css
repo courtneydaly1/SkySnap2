@@ -1,14 +1,48 @@
-.create-post-button,
-.back-to-dashboard-button {
-  padding: 10px 20px;
-  margin: 10px;
-  background-color: #27ae60;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.create-post-button:hover,
-.back-to-dashboard-button:hover {
-  background-color: #229954;
-}
+.create-post-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .create-post-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .create-post-form input,
+  .create-post-form textarea,
+  .create-post-form button {
+    margin-bottom: 15px;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+  
+  .create-post-form input,
+  .create-post-form textarea {
+    resize: vertical;
+  }
+  
+  .create-post-form button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .create-post-form button:hover {
+    background-color: #45a049;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 14px;
+    margin-bottom: 15px;
+  }
+  

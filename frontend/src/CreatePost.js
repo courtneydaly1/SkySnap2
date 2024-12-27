@@ -1,23 +1,31 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import "./CreatePost.css"
+import './CreatePost.css';
 
 function CreatePost() {
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [caption, setCaption] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');  // Clear previous errors
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found. Please log in.");
+      // Basic Validation
+      if (!location || !description || !caption) {
+        setError('All fields are required.');
+        return;
+      }
 
-      const response = await fetch("http://127.0.0.1:5000/posts/create", {
-        method: "POST",
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found. Please log in.');
+
+      const response = await fetch('http://127.0.0.1:5000/posts/create', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
@@ -28,17 +36,25 @@ function CreatePost() {
       });
 
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
-      const data = await response.json();
-      navigate("/posts"); // Navigate to the posts page after creating a post
+
+      // Clear the form after successful submission
+      setLocation('');
+      setDescription('');
+      setCaption('');
+
+      // Navigate to the posts page
+      navigate('/posts');
     } catch (err) {
-      console.error("Error creating post", err);
+      console.error('Error creating post', err);
+      setError('Failed to create post. Please try again later.');
     }
   };
 
   return (
-    <div>
+    <div className="create-post-container">
       <h1>Create a New Post</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="create-post-form">
+        {error && <p className="error-message">{error}</p>}
         <input
           type="text"
           value={location}
@@ -50,11 +66,13 @@ function CreatePost() {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Description"
+          required
         />
         <textarea
           value={caption}
           onChange={(e) => setCaption(e.target.value)}
           placeholder="Caption"
+          required
         />
         <button type="submit">Create Post</button>
       </form>
