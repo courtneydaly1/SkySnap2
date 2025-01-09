@@ -1,14 +1,46 @@
 from app import app, db
-from flask import jsonify, request
+from flask import jsonify, request, Flask
 from flask_cors import cross_origin
 import json
 from services.weather_services import *
-from services.post_services import create_post
+# from services.post_services import create_post
 from services.user_services import create_user, login_user
 from models import Post, User, Media, WeeklyWeather, DailyWeather, RealtimeWeather
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager,create_access_token, jwt_required, get_jwt_identity
+from datetime import datetime, timedelta
+from werkzeug.utils import secure_filename
+import os 
+from sqlalchemy.exc import SQLAlchemyError
 
 
+# Define allowed image and video file types
+app.config['UPLOADED_MEDIA_DEST'] = 'static/uploads'  # Directory to store uploaded files
+
+# Configure upload settings
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        # Create a unique file name using uuid
+        unique_filename = f"{uuid.uuid4()}_{filename}"
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+        file.save(file_path)
+        return jsonify({"message": f"File {unique_filename} uploaded successfully!"}), 200
+    else:
+        return jsonify({"error": "Invalid file type"}), 400
 
     
 # Base Routes
@@ -24,6 +56,25 @@ def test():
     return jsonify({"message": "It works!"})
 
 # User Routes
+
+# Generate a JWT token
+def generate_token(user):
+    """
+    Generate a JWT token for the authenticated user.
+    :param user: The user object or dictionary containing user data
+    :return: A JWT token
+    """
+    try:
+        # Generate the access token (with optional expiration)
+        access_token = create_access_token(
+            identity=user['username'],
+            additional_claims={"user_id": user['id']},   
+            expires_delta=timedelta(days=1) 
+        )
+        return access_token
+    except Exception as e:
+        raise ValueError(f"Error generating token: {str(e)}")
+
 @app.route('/auth/signup', methods=['POST', 'OPTIONS'])
 @cross_origin(origins="http://localhost:3000")
 def signup():
@@ -37,23 +88,36 @@ def signup():
         if not data:
             return jsonify({"error": "Invalid JSON payload"}), 400
         
-        # You can also validate the presence of required fields
         if not data.get("username") or not data.get("password"):
             return jsonify({"error": "Missing required fields"}), 400
+
+        # Create the user and generate the token
+        response, status_code = create_user(data)
+        if 'error' in response:
+            return jsonify(response), status_code
         
-        response = create_user(data=data)
-        return jsonify(response), 201
+         # Extract the user and message from the response
+        message = response.get('message')
+        user = response.get('user')
+        
+       
+        # Generate the JWT token
+        token = generate_token(response['user'])
+        
+
+        # Return the token and user data in the response
+        return jsonify({
+            "message": message,
+            "token": token,
+            "userId": response['user']['id'],
+            "username": response['user']['username'],
+            "first_name": response['user']['first_name'],
+            "last_name": response['user']['last_name'],
+            "local_zipcode": response['user']['local_zipcode']
+        }), 201
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-    return jsonify({
-        "message": "User created successfully!",
-        "user": {"id": new_user.id, "username": new_user.username}
-        }), 201
-
-
-
 
 @app.route('/auth/login', methods=['POST'])
 def login():
@@ -64,11 +128,20 @@ def login():
         if not data:
             return jsonify({"error": "Invalid JSON payload"}), 400
         
-        # You can also validate the presence of required fields
         if not data.get("username") or not data.get("password"):
             return jsonify({"error": "Missing required fields"}), 400
-        
-        return jsonify(login_user(data=data)), 200
+
+        # Validate user credentials (e.g., check password, etc.)
+        user = login_user(data)
+        if 'error' in user:
+            return jsonify(user), 400
+
+        token = generate_token(user)  
+        return jsonify({
+            "token": token,
+            "userId": user['id']
+        }), 200
+    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -112,7 +185,165 @@ def show_dashboard():
     return jsonify(dashboard_data), 200
 
 ############################## Post Routes
-from flask_jwt_extended import jwt_required, get_jwt_identity
+
+# @app.route('/posts', methods=['GET'])
+# @jwt_required()  # Ensure the user is logged in
+# def get_posts():
+#     """Retrieve posts with pagination (for infinite scrolling)."""
+#     try:
+#         # Get the logged-in user from the JWT token
+#         current_user = get_jwt_identity()
+#         user = User.query.filter_by(username=current_user).first()
+
+#         if not user:
+#             return jsonify({"error": "User not found."}), 404
+
+#         # Check if the user has a ZIP code
+#         zip_code = user.local_zipcode
+#         if not zip_code:
+#             return jsonify({
+#                 "error": "You must set a ZIP code to view posts.",
+#                 "set_zip_button": {
+#                     "text": "Set Your ZIP Code",
+#                     "url": "/auth/signup"  # URL to sign up and get zipcode
+#                 }
+#             }), 400
+
+#         # If the user has a ZIP code, get the pagination params
+#         page = request.args.get('page', 1, type=int)
+#         per_page = request.args.get('per_page', 10, type=int)
+
+#         # Query posts for that ZIP code and paginate
+#         posts_query = Post.query.filter(Post.location == zip_code).paginate(page, per_page, False)
+
+#         if not posts_query.items:
+#             return jsonify({
+#                 "message": "No posts yet.",
+#                 "create_post_button": {
+#                     "text": "Create a Post",
+#                     "url": "/posts/create"
+#                 }
+#             }), 404
+
+#         # Prepare the posts data (include media if any)
+#         posts_data = []
+#         for post in posts_query.items:
+#             post_data = post.serialize()
+#             post_data["media"] = [media.serialize() for media in post.media]  # Including media data
+#             posts_data.append(post_data)
+
+#         return jsonify(posts_data)
+
+#     except Exception as e:
+#         app.logger.error(f"Error retrieving posts: {str(e)}")
+#         return jsonify({"error": str(e)}), 500
+
+# @app.route('/posts/create', methods=['POST'])
+# def create_new_post():
+#     """Create a new post."""
+#     try:
+#         # Get JSON data from the request
+#         data = request.get_json()
+
+#         # Validate JSON payload
+#         if not data:
+#             return jsonify({"error": "Invalid JSON payload"}), 400
+
+#         # Validate required fields
+#         if not data.get("location") or not data.get("user_id"):
+#             return jsonify({"error": "Missing required fields: location, user_id"}), 400
+
+#         # Optionally, validate other fields like 'content'
+#         if not data.get("content"):
+#             return jsonify({"error": "Missing required field: content"}), 400
+
+#         # Call the helper function to create the post
+#         post = create_post(data)
+
+#         # Return the created post with a 201 status code
+#         return jsonify(post.serialize()), 201
+#     except Exception as e:
+#         app.logger.error(f"Error creating post: {str(e)}")
+#         return jsonify({"error": str(e)}), 500
+
+
+# def create_post(data):
+#     """Helper function to create a new post."""
+#     try:
+#         app.logger.info(f"Creating post with data: {data}") 
+#         post = Post(
+#             location=data.get("location"),
+#             description=data.get("description"),
+#             user_id=data.get("user_id"),
+#             image_url=data.get("image_url", ""), 
+#             caption=data.get("caption"),      
+#             realtime_weather_id=data.get("realtime_weather_id") 
+#         )
+#         db.session.add(post)
+#         db.session.commit()
+        
+#         # Optionally handle media attachments if provided
+#         if data.get("media"):
+#             for media_data in data["media"]:
+#                 media = Media(
+#                     media_url=media_data["media_url"],
+#                     post_id=post.id
+#                 )
+#                 db.session.add(media)
+        
+#         return post
+#     except Exception as e:
+#         db.session.rollback()  
+#         app.logger.error(f"Error in create_post: {str(e)}. Data: {data}")  
+#         raise  # Re-raise the exception after logging it
+
+@app.route('/posts/create', methods=['POST'])
+@jwt_required()  # Ensure the user is logged in
+def create_new_post():
+    """Create a new post with media upload."""
+    try:
+        # Get form data and file
+        data = request.form  # Get form data (text fields)
+        file = request.files.get('media')  # Get file data (if any)
+        
+        # Validate required fields
+        location = data.get('location')
+        description = data.get('description')
+        caption = data.get('caption')
+        user_id = get_jwt_identity()
+        
+        if not location or not description or not caption:
+            return jsonify({"error": "Missing required fields: location, description, caption."}), 400
+
+        # Create the post object
+        new_post = Post(
+            location=location,
+            description=description,
+            caption=caption,
+            user_id=user_id
+        )
+
+        # Handle file upload (media file)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            new_post.image_url = file_path  
+        
+        # Save the post to the database
+        db.session.add(new_post)
+        db.session.commit()
+
+        return jsonify(new_post.serialize()), 201
+    except SQLAlchemyError as e:
+        db.session.rollback() 
+        return jsonify({"error": "Database error: " + str(e)}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    except Exception as e:
+        app.logger.error(f"Error creating post: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route('/posts', methods=['GET'])
 @jwt_required()  # Ensure the user is logged in
@@ -127,14 +358,11 @@ def get_posts():
             return jsonify({"error": "User not found."}), 404
 
         # Check if the user has a ZIP code
-        zip_code = user.local_zipcode
+        zip_code = request.args.get('zip_code')  # Get the zip_code from query string
+
         if not zip_code:
             return jsonify({
-                "error": "You must set a ZIP code to view posts.",
-                "set_zip_button": {
-                    "text": "Set Your ZIP Code",
-                    "url": "/profile/set-zipcode"  # URL to update the user's profile with a ZIP code
-                }
+                "error": "You must provide a zip code to view posts."
             }), 400
 
         # If the user has a ZIP code, get the pagination params
@@ -142,7 +370,7 @@ def get_posts():
         per_page = request.args.get('per_page', 10, type=int)
 
         # Query posts for that ZIP code and paginate
-        posts_query = Post.query.filter(Post.location == zip_code).paginate(page, per_page, False)
+        posts_query = Post.query.filter(Post.location == zip_code).paginate(page=page, per_page=per_page, error_out=False)
 
         if not posts_query.items:
             return jsonify({
@@ -165,66 +393,6 @@ def get_posts():
     except Exception as e:
         app.logger.error(f"Error retrieving posts: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
-@app.route('/posts/create', methods=['POST'])
-def create_new_post():
-    """Create a new post."""
-    try:
-        # Get JSON data from the request
-        data = request.get_json()
-
-        # Validate JSON payload
-        if not data:
-            return jsonify({"error": "Invalid JSON payload"}), 400
-
-        # Validate required fields
-        if not data.get("location") or not data.get("user_id"):
-            return jsonify({"error": "Missing required fields: location, user_id"}), 400
-
-        # Optionally, validate other fields like 'content'
-        if not data.get("content"):
-            return jsonify({"error": "Missing required field: content"}), 400
-
-        # Call the helper function to create the post
-        post = create_post(data)
-
-        # Return the created post with a 201 status code
-        return jsonify(post.serialize()), 201
-    except Exception as e:
-        app.logger.error(f"Error creating post: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
-
-def create_post(data):
-    """Helper function to create a new post."""
-    try:
-        post = Post(
-            location=data.get("location"),
-            description=data.get("description"),
-            user_id=data.get("user_id"),
-            image_url=data.get("image_url", ""), 
-            caption=data.get("caption", ""),      
-            realtime_weather_id=data.get("realtime_weather_id") 
-        )
-        db.session.add(post)
-        db.session.commit()
-        
-        # Optionally handle media attachments if provided
-        if data.get("media"):
-            for media_data in data["media"]:
-                media = Media(
-                    media_url=media_data["media_url"],
-                    post_id=post.id
-                )
-                db.session.add(media)
-        
-        return post
-        
-    except Exception as e:
-        db.session.rollback()  # Rollback in case of failure
-        app.logger.error(f"Error in create_post: {str(e)}")
-        raise
-
 
 
 
@@ -305,8 +473,6 @@ def get_user_forecast():
                 "visibility": entry['values'].get('visibilityAvg'),
                 "windSpeed": entry['values'].get('windSpeedAvg'),
                 "cloudBase": entry['values'].get('cloudBaseAvg'),
-            
-                
             }
             for entry in forecast_entries
         ]
@@ -316,6 +482,7 @@ def get_user_forecast():
         })
     except Exception as e:
         return jsonify({"error": f"Failed to fetch weather data: {str(e)}"}), 500
+
 
 
 @app.route('/weather/:zipcode', methods=['GET'])

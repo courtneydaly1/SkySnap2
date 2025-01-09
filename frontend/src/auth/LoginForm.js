@@ -24,12 +24,6 @@ function LoginForm({ login }) {
   const [isLoading, setIsLoading] = useState(false);
   const urlParams = new URLSearchParams(window.location.search);
   const success = urlParams.get('success');  
-  console.debug(
-    "LoginForm",
-    "login=", typeof login,
-    "formData=", formData,
-    "formErrors", formErrors,
-  );
 
   /** Handle form submission:
    *
@@ -44,7 +38,14 @@ function LoginForm({ login }) {
     setIsLoading(false); 
 
     if (result.success) {
-      navigate('/dashboard');  
+      // Save user data and token to localStorage
+      const { userId, token } = result.data;  // Assuming this is returned from the login API
+      localStorage.setItem('userId', userId);
+      localStorage.setItem('token', token);
+
+      // Redirect user to dashboard or back to the previous page
+      const redirectTo = urlParams.get('redirect') || '/dashboard';  // Optional redirect
+      navigate(redirectTo);  
     } else {
       setFormErrors(result.errors || ['Login failed. Please try again.']);  
     }
@@ -58,13 +59,13 @@ function LoginForm({ login }) {
 
   return (
     <div className="login-container">
-       <div>
-      {success === 'true' && (
-        <div className="success-message">
-          Created successfully!
-        </div>
-      )}
-    </div>
+      <div>
+        {success === 'true' && (
+          <div className="success-message">
+            Created successfully! Please log in.
+          </div>
+        )}
+      </div>
       <h2 className="login-title">Login</h2>
       <form onSubmit={handleSubmit} className="login-form">
         <input
@@ -104,4 +105,5 @@ function LoginForm({ login }) {
 }
 
 export default LoginForm;
+
 

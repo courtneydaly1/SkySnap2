@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Routes, Route } from 'react-router-dom';  
+import { useNavigate, Routes, Route } from 'react-router-dom';
 import WeatherApi from './api';
 import UserContext from './auth/UserContext';
 import jwt from 'jsonwebtoken';
@@ -9,9 +9,10 @@ import LoginForm from './auth/LoginForm';
 import SignupForm from './auth/SignupForm';
 import LoadingSpinner from './LoadingSpinner';
 import Home from "./Home";
-import Dashboard from "./Dashboard"
+import Dashboard from "./Dashboard";
 import WeatherPage from './WeatherPage';
-
+import Posts from "./Posts"; 
+import CreatePost from "./CreatePost"; 
 export const TOKEN_STORAGE_ID = 'token';
 
 function App() {
@@ -29,11 +30,11 @@ function App() {
         try {
           // Decode the token to get the username
           const decodedToken = jwt.decode(token);
-          console.log(decodedToken)
+          console.log(decodedToken);
           if (decodedToken) {
             WeatherApi.token = token;
+            // Optionally: fetch current user data if needed
             // const currentUser = await WeatherApi.getCurrentUser(decodedToken.sub);
-            // debugger;
             // setCurrentUser(currentUser);
           } else {
             console.error('Invalid token: no username found.');
@@ -65,12 +66,9 @@ function App() {
       return { success: true };  
     } catch (e) {
       console.error('Signup failed', e?.message || e);
-      
-      // Return an error message in a consistent format that the form expects
       return { success: false, errors: [e?.message || "An error occurred during signup."] };
     }
   }
-  
 
   async function login(loginData) {
     try {
@@ -80,7 +78,7 @@ function App() {
       setCurrentUser(response);
       return { success: true };
     } catch (e) {
-      console.error('login failed', e?.message || e);
+      console.error('Login failed', e?.message || e);
       return { success: false, e: e?.message || e };
     }
   }
@@ -91,13 +89,13 @@ function App() {
     <div className="App">
       <UserContext.Provider value={{ currentUser, setCurrentUser }}>
         <Navigation logout={handleLogout} />
-        <Routes>  
+        <Routes>
           {/* Home route */}
           <Route path="/" element={<Home />} />
-          
+
           {/* Login route */}
           <Route path="/login" element={<LoginForm login={login} />} />
-          
+
           {/* Signup route */}
           <Route path="/signup" element={<SignupForm signup={signup} />} />
 
@@ -105,7 +103,13 @@ function App() {
           <Route path="/dashboard" element={<Dashboard user={currentUser} />} />
 
           {/* Weather Page route */}
-          <Route path="/weather/:zipcode" element={<WeatherPage />} />
+          <Route path="/weather" element={<WeatherPage />} />
+
+          {/* Posts route
+          <Route path="/posts" element={<Posts zipcode={user.local_zipcode}/>} /> */}
+
+          {/* Create Post route */}
+          <Route path="/posts/create" element={<CreatePost />} />
         </Routes>
       </UserContext.Provider>
     </div>

@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom'; // useLocation to get URL parameters
 import './Posts.css';
 
 function Posts() {
@@ -8,8 +8,9 @@ function Posts() {
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [zipCode, setZipCode] = useState(null); // State to store the user's ZIP code
+  const [zipCode, setZipCode] = useState(null); 
   const navigate = useNavigate();
+  const location = useLocation(); // To access the current location and query params
 
   const fetchPosts = useCallback(async (zipCode, pageNumber) => {
     setLoading(true);
@@ -40,54 +41,28 @@ function Posts() {
         setPosts((prevPosts) => [...prevPosts, ...data]);
       }
     } catch (err) {
-      setError('Failed to fetch posts. Please try again later.');
+      setError('No current posts for this Zipcode.');
     } finally {
       setLoading(false);
     }
   }, []);
 
   const handleSetZipCode = () => {
-    navigate('/profile/set-zipcode');
+    navigate('/auth/signup');
   };
 
   useEffect(() => {
-    // Fetch the user's ZIP code when the component mounts
-    const fetchUserZipCode = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setError('You need to log in first.');
-          return;
-        }
-
-        const response = await fetch('http://127.0.0.1:5000/dashboard', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch user profile.');
-        }
-
-        const data = await response.json();
-        const zipCode = data.user.local_zipcode;
-
-        if (zipCode) {
-          setZipCode(zipCode);
-          fetchPosts(zipCode, page); // Fetch posts once ZIP code is available
-        } else {
-          setError('You need to set your ZIP code first.');
-        }
-      } catch (err) {
-        setError('Failed to fetch user data.');
-      }
-    };
-
-    fetchUserZipCode();
-  }, [fetchPosts, page]);
+    // Retrieve the zip_code from the query parameters
+    const queryParams = new URLSearchParams(location.search);
+    const zipCodeFromUrl = queryParams.get('zip_code');
+    
+    if (zipCodeFromUrl) {
+      setZipCode(zipCodeFromUrl);
+      fetchPosts(zipCodeFromUrl, page); 
+    } else {
+      setError('ZIP Code is missing.');
+    }
+  }, [location.search, fetchPosts, page]);
 
   const loadMore = () => {
     if (!loading && hasMore) {
@@ -140,4 +115,3 @@ function Posts() {
 }
 
 export default Posts;
-

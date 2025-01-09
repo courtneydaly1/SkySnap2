@@ -71,8 +71,11 @@ function Dashboard() {
         <button onClick={fetchForecast} className="dashboard-link-button">
           View Weather
         </button>
-        <Link to="/posts" className="dashboard-link-button">
-          Your Snaps
+        <Link
+          to={`/posts?zip_code=${user.local_zipcode}`}
+          className="dashboard-link-button"
+        >
+          Snaps
         </Link>
       </div>
 

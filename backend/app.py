@@ -1,7 +1,8 @@
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+
 
 
 # Initialize Flask app
@@ -29,8 +30,9 @@ from models import *
 @app.after_request
 def add_security_headers(response):
     response.headers["Content-Security-Policy"] = "script-src 'self'"  
-    return response
     app.logger.info('This is info output')
+    return response
+    
 with app.app_context():
     db.create_all()  # Make sure your DB is set up
    

@@ -57,10 +57,15 @@ class WeatherApi {
   }
 
   /** Register a new user. */
-  static async signup(data) {
-    let res = await this.request("auth/signup", data, "post");
-    return res.token; // Return the token for storage
-  }
+  /** Register a new user. */
+static async signup(data) {
+  let res = await this.request("auth/signup", data, "post");
+  return {
+    token: res.token,
+    userId: res.userId // Assuming userId is part of the response
+  };
+}
+
   /** Check if username is available. */
   static async checkUsername(username) {
     let res = await this.request("auth/check-username", { username }, "post");
