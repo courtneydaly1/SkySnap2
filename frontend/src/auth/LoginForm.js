@@ -57,8 +57,13 @@ function LoginForm({ login }) {
         // Check if both username and access_token are available
         if (token && username) {
           // Store the username and token in localStorage
-          localStorage.setItem('username', username); // Store username (if you need it)
-          localStorage.setItem('token', token); // Store the token
+          localStorage.setItem('username', username); 
+          debugger;
+          localStorage.setItem('token', token);
+          localStorage.setItem('first_name', first_name); 
+          localStorage.setItem('last_name', last_name);
+          localStorage.setItem('local_zipcode', local_zipcode);
+         
   
 
           navigate('/dashboard');

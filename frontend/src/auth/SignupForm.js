@@ -67,6 +67,7 @@ function SignupForm() {
     try {
         const result = await axios.post('http://127.0.0.1:5000/auth/signup', userData);
         if (result && result.data && result.data.token) {
+          
           const { message, token } = result.data;
 
           console.log('Response data:', result.data);
@@ -77,7 +78,7 @@ function SignupForm() {
             localStorage.setItem('first_name', result.data.first_name);
             localStorage.setItem('last_name', result.data.last_name);
             localStorage.setItem('local_zipcode', result.data.local_zipcode);
-            localStorage.setItem('token', result.data.token);
+            localStorage.setItem('token', token);
 
             console.log(localStorage); // Check if values are set correctly
             navigate("/dashboard");

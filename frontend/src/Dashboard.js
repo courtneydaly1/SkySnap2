@@ -9,48 +9,51 @@ function Dashboard() {
   const [forecast, setForecast] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        console.log("Token before fetching user data:", token); // Log token
-  
-        if (!token) {
-          throw new Error("No token found. Please log in.");
+  const fetchUserData = async () => {
+    const token = localStorage.getItem("token");
+    console.log("Token before fetching user data:", token); // Log token
+
+    if (!token) {
+      console.error("No token found, redirecting to login.");
+      navigate("/login");  // Redirect to login if token is missing
+      return;
+    }
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/dashboard", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        // Handle invalid or expired token
+        if (response.status === 401) {
+          console.error("Invalid or expired token.");
+          localStorage.removeItem("token");  // Remove the token
+          navigate("/login");  // Redirect to login
+          return;
         }
-  
-        const response = await fetch("http://127.0.0.1:5000/dashboard", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-  
-        if (!response.ok) {
-          // Token might have expired or is invalid
-          if (response.status === 401) {
-            localStorage.removeItem("token");
-            navigate("/login");
-            return;
-          }
-          throw new Error(`Error: ${response.statusText}`);
-        }
-  
-        const data = await response.json();
-        setUser(data.user);
-        setIsLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setIsLoading(false);
-        if (err.message === "No token found. Please log in.") {
-          navigate("/login"); // Redirect if no token
-        }
+
+        throw new Error(`Error: ${response.statusText}`);
       }
-    };
-  
-    // On component mount, check for token in localStorage
-    fetchUserData();
-  }, [navigate]);
-  
+
+      const data = await response.json();
+      setUser(data.user);
+      setIsLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setIsLoading(false);
+      if (err.message === "No token found. Please log in.") {
+        navigate("/login");  // Redirect if token is missing
+      }
+    }
+  };
+
+  // UseEffect to call fetchUserData when the component mounts
+  useEffect(() => {
+    fetchUserData(); // This will run the function when the component is loaded
+  }, []);  // Empty dependency array means it runs once on component mount
 
   const fetchForecast = async () => {
     try {

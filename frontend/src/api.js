@@ -86,19 +86,19 @@ class WeatherApi {
      // Log the entire response to verify its structure
     console.log("Raw response from login:", res);
     // Destructure the response data
-    const { token, userId, first_name, last_name, local_zipcode } = res;
-  
+    const { token, username, first_name, last_name, local_zipcode, userId } = res;
+    
     // If successful, return the data
     return {
       token: token,
-      user: {
+      user:{
         userId,
+        username,
         first_name,
         last_name,
         local_zipcode
       }
-    };
-  }
+  }};
   
 
   static async getPosts() {

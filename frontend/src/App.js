@@ -33,8 +33,8 @@ function App() {
           const decodedToken = jwt.decode(token);
           if (decodedToken) {
             WeatherApi.token = token;
-            const user = await WeatherApi.getCurrentUser(decodedToken.sub);
-            setCurrentUser(user);
+            const username = await WeatherApi.getCurrentUser(decodedToken.sub);
+            setCurrentUser(username);
           } else {
             console.error('There is an error with the token. It has likely expired');
             setCurrentUser(null);
@@ -71,7 +71,8 @@ function App() {
   async function login(loginData) {
     try {
       const response = await WeatherApi.login(loginData);
-      setToken(response.access_token);
+      debugger;
+      setToken(response.token);
       setCurrentUser(response.user);
       
       navigate('/dashboard')

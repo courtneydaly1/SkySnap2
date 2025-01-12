@@ -116,12 +116,13 @@ def signup():
         return jsonify({
             "message": "User created successfully",
             "token": token,
-            "userId": new_user.id,
-            "username": new_user.username,
-            "first_name": new_user.first_name,
-            "last_name": new_user.last_name,
-            "local_zipcode": new_user.local_zipcode
-        }), 201
+            "user":{
+                "userId": new_user.id,
+                "username": new_user.username,
+                "first_name": new_user.first_name,
+                "last_name": new_user.last_name,
+                "local_zipcode": new_user.local_zipcode
+        }}), 201
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -164,7 +165,7 @@ def login():
         
         return jsonify({
             "token": token,
-            "userId": user['username'],
+            "username": user['username'],
             "first_name": user['first_name'],
             "last_name": user['last_name'],
             "local_zipcode": user.get('local_zipcode', '')  # Handle missing data gracefully
