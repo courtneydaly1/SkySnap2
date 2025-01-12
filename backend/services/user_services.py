@@ -4,6 +4,7 @@ from app import db
 from models import User
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
+from app import app
 import re  # For additional validation
 
 from flask import jsonify
@@ -21,7 +22,7 @@ def create_user(data):
         username = data.get('username')
         first_name = data.get('first_name')  
         last_name = data.get('last_name')    
-        local_zipcode = data.get('localZipcode')  
+        local_zipcode = data.get('local_zipcode')  
         password = data.get('password')
 
         # Validate input fields
@@ -83,7 +84,7 @@ def login_user(data):
         data (dict): A dictionary containing user credentials.
 
     Returns:
-        Response object: A JSON response indicating success or failure.
+        dict: A dictionary indicating success or failure, including relevant user data.
     """
     try:
         # Extract username and password from the request
@@ -91,37 +92,53 @@ def login_user(data):
         password = data.get('password')
 
         if not username or not password:
-            return jsonify({"error": "Username and password are required."}), 400
-
+            app.logger.error("Missing username or password")
+            return {"error": "Username and password are required."}, 400
+        
         # Fetch the user from the database
         user = User.query.filter_by(username=username).first()
 
         if not user:
-            return jsonify({"error": "Invalid username or password."}), 401
+            app.logger.error(f"User not found: {username}")
+            return {"error": "Invalid username or password."}, 401
 
         # Validate the user's password
         if check_password_hash(user.password, password):
-            # Generate a JWT access token with an optional expiration time (e.g., 24 hours)
-            access_token = create_access_token(identity=user.username, expires_delta=timedelta(hours=24))
+            # Log user details for debugging
+            app.logger.info(f"User details: {user}")
+            app.logger.info(f"User's username type: {type(user.username)}")
 
-            return jsonify({
+            # Ensure username is a string (shouldn't typically be a tuple)
+            if isinstance(user.username, tuple):
+                user.username = str(user.username[0])  # Forcefully convert it to a string if it's a tuple
+                app.logger.info(f"Converted username to string: {user.username}")
+
+            # Generate the JWT access token
+            access_token = create_access_token(
+                identity=user.username  # Use username or user.id here, NOT both
+            )
+            
+            app.logger.info(f"Generated token: {access_token}")
+
+            # Ensure the user data is not incomplete
+            if not user.username or not user.first_name or not user.last_name:
+                app.logger.error("Incomplete user data returned")
+                return {"error": "Incomplete user data returned from the database."}, 500
+
+            # Return the user data as a dictionary, not a response object
+            return {
                 "message": "Login successful",
                 "access_token": access_token,
                 "username": user.username,
                 "first_name": user.first_name,
                 "last_name": user.last_name,
-                "local_zipcode": user.local_zipcode
-            }), 200
+                "local_zipcode": user.local_zipcode or ''  # Safely handle missing local_zipcode
+            }
 
         # Invalid password
-        return jsonify({"error": "Invalid username or password."}), 401
+        app.logger.error("Invalid password")
+        return {"error": "Invalid username or password."}, 401
 
     except Exception as e:
-        return jsonify({"error": "An error occurred while logging in.", "details": str(e)}), 500
-
-
-
-
-
-
-
+        app.logger.error(f"Error during login: {str(e)}")
+        return {"error": "An error occurred while logging in.", "details": str(e)}, 500

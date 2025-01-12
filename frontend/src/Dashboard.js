@@ -13,26 +13,44 @@ function Dashboard() {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("token");
-        if (!token) throw new Error("No token found. Please log in.");
-
+        console.log("Token before fetching user data:", token); // Log token
+  
+        if (!token) {
+          throw new Error("No token found. Please log in.");
+        }
+  
         const response = await fetch("http://127.0.0.1:5000/dashboard", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-
-        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+  
+        if (!response.ok) {
+          // Token might have expired or is invalid
+          if (response.status === 401) {
+            localStorage.removeItem("token");
+            navigate("/login");
+            return;
+          }
+          throw new Error(`Error: ${response.statusText}`);
+        }
+  
         const data = await response.json();
         setUser(data.user);
         setIsLoading(false);
       } catch (err) {
         setError(err.message);
         setIsLoading(false);
+        if (err.message === "No token found. Please log in.") {
+          navigate("/login"); // Redirect if no token
+        }
       }
     };
-
+  
+    // On component mount, check for token in localStorage
     fetchUserData();
-  }, []);
+  }, [navigate]);
+  
 
   const fetchForecast = async () => {
     try {

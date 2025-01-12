@@ -61,33 +61,33 @@ function SignupForm() {
         password: formData.password,
         first_name: formData.first_name,
         last_name: formData.last_name,
-        localZipcode: formData.local_zipcode
+        local_zipcode: formData.local_zipcode
     };
 
     try {
         const result = await axios.post('http://127.0.0.1:5000/auth/signup', userData);
-        debugger;
-        if (result && result.data) {
-          console.log("Signup result:", result);  // Check the structure of the response  
-          const { message, user} = result.data;
-            console.log('Response data:', result.data);  // Log the data
-            if (message === 'User created successfully!') {
-              
-              localStorage.setItem('userId', result.data.userId);
-              localStorage.setItem('username', result.data.username);
-              localStorage.setItem('first_name', result.data.first_name);
-              localStorage.setItem('last_name', result.data.last_name);
-              localStorage.setItem('local_zipcode', result.data.local_zipcode);
-              localStorage.setItem('token', result.data.token);
-              
-              navigate("/dashboard");
-          } 
-      }
-  } catch (error) {
-      console.error('Error during signup:', error.response || error);
-      alert('Signup failed. Please try again.');
-  }
-};
+        if (result && result.data && result.data.token) {
+          const { message, token } = result.data;
+
+          console.log('Response data:', result.data);
+
+          if (message === 'User created successfully') {
+            localStorage.setItem('userId', result.data.userId);
+            localStorage.setItem('username', result.data.username);
+            localStorage.setItem('first_name', result.data.first_name);
+            localStorage.setItem('last_name', result.data.last_name);
+            localStorage.setItem('local_zipcode', result.data.local_zipcode);
+            localStorage.setItem('token', result.data.token);
+
+            console.log(localStorage); // Check if values are set correctly
+            navigate("/dashboard");
+          }
+        }
+    } catch (error) {
+        console.error('Error during signup:', error.response || error);
+        alert('Signup failed. Please try again.');
+    }
+  };
 
   return (
     <div className="signup-container">
@@ -138,7 +138,6 @@ function SignupForm() {
           value={formData.password}
         />
         {fieldErrors.password && <span className="error-message">{fieldErrors.password}</span>}
-
 
         {fieldErrors && Object.values(fieldErrors).length > 0 && (
           <Alert type="danger" messages={Object.values(fieldErrors)} />

@@ -1,16 +1,20 @@
 from app import app, db
-from flask import jsonify, request, Flask
+from flask import jsonify, request
 from flask_cors import cross_origin
 import json
 from services.weather_services import *
 # from services.post_services import create_post
 from services.user_services import create_user, login_user
-from models import Post, User, Media, WeeklyWeather, DailyWeather, RealtimeWeather
-from flask_jwt_extended import JWTManager,create_access_token, jwt_required, get_jwt_identity
+from models import Post, User, Media, WeeklyWeather, DailyWeather, RealtimeWeather, Token
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
-import os 
+import os
+import uuid
 from sqlalchemy.exc import SQLAlchemyError
+from app import app
+import jwt
+from werkzeug.security import generate_password_hash
 
 
 # Define allowed image and video file types
@@ -42,12 +46,12 @@ def upload_file():
     else:
         return jsonify({"error": "Invalid file type"}), 400
 
-    
+
 # Base Routes
 @app.route('/', methods=['GET'])
 def home():
     """Home route."""
-    return  "Welcome to SkySnap!"
+    return "Welcome to SkySnap!"
 
 
 @app.route('/test', methods=['GET'])
@@ -65,85 +69,143 @@ def generate_token(user):
     :return: A JWT token
     """
     try:
-        # Generate the access token (with optional expiration)
-        access_token = create_access_token(
-            identity=user['username'],
-            additional_claims={"user_id": user['id']},   
-            expires_delta=timedelta(days=1) 
-        )
+        # Create token with expiration time (default 15 minutes)
+        access_token = create_access_token(identity=user['id'])
         return access_token
+
     except Exception as e:
         raise ValueError(f"Error generating token: {str(e)}")
+
 
 @app.route('/auth/signup', methods=['POST', 'OPTIONS'])
 @cross_origin(origins="http://localhost:3000")
 def signup():
     """User Signup Endpoint."""
-    
     if request.method == 'OPTIONS':
         return "", 204
 
     try:
+        # Get the data from the request
         data = request.get_json()
         if not data:
             return jsonify({"error": "Invalid JSON payload"}), 400
-        
+
+        # Check for required fields
         if not data.get("username") or not data.get("password"):
             return jsonify({"error": "Missing required fields"}), 400
 
-        # Create the user and generate the token
-        response, status_code = create_user(data)
-        if 'error' in response:
-            return jsonify(response), status_code
+        # Create the user and add to DB
+        hashed_password = generate_password_hash(data['password'])
+        new_user = User(username=data['username'], 
+                        first_name=data['first_name'], 
+                        last_name=data['last_name'],
+                        password=hashed_password,
+                        local_zipcode=data['local_zipcode'])
         
-         # Extract the user and message from the response
-        message = response.get('message')
-        user = response.get('user')
-        
-       
-        # Generate the JWT token
-        token = generate_token(response['user'])
-        
+        db.session.add(new_user)
+        db.session.commit()
 
-        # Return the token and user data in the response
+        # Generate JWT token for user
+        token = generate_token({'username': new_user.username, 'id': new_user.id})
+
+        # Save token to database
+        new_token = Token(token=token, user_id=new_user.id)
+        db.session.add(new_token)
+        db.session.commit()
+
         return jsonify({
-            "message": message,
+            "message": "User created successfully",
             "token": token,
-            "userId": response['user']['id'],
-            "username": response['user']['username'],
-            "first_name": response['user']['first_name'],
-            "last_name": response['user']['last_name'],
-            "local_zipcode": response['user']['local_zipcode']
+            "userId": new_user.id,
+            "username": new_user.username,
+            "first_name": new_user.first_name,
+            "last_name": new_user.last_name,
+            "local_zipcode": new_user.local_zipcode
         }), 201
-    
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
 
 @app.route('/auth/login', methods=['POST'])
 def login():
     """Log in an existing user."""
-    
     try:
         data = request.get_json()
         if not data:
             return jsonify({"error": "Invalid JSON payload"}), 400
         
+        app.logger.info(f"Received data: {data}")
+                         
+        # Check if username and password are provided
         if not data.get("username") or not data.get("password"):
             return jsonify({"error": "Missing required fields"}), 400
 
-        # Validate user credentials (e.g., check password, etc.)
+        # Call login_user to authenticate the user
         user = login_user(data)
+        
+        app.logger.info(f"User returned from login_user: {user}")
+
+        # Handle errors from login_user
         if 'error' in user:
+            app.logger.error(f"Login error: {user['error']}")
             return jsonify(user), 400
 
-        token = generate_token(user)  
+        # Ensure the user is a dictionary
+        if not isinstance(user, dict):
+            app.logger.error(f"Invalid data structure returned from login_user: {user}")
+            return jsonify({"error": "Invalid user data returned from login_user"}), 500
+
+        # Generate the token and respond
+        token = user['access_token']
+        app.logger.info(f"Generated token: {token}")
+        
         return jsonify({
             "token": token,
-            "userId": user['id']
+            "userId": user['username'],
+            "first_name": user['first_name'],
+            "last_name": user['last_name'],
+            "local_zipcode": user.get('local_zipcode', '')  # Handle missing data gracefully
         }), 200
-    
+
+    except Exception as e:
+        app.logger.error(f"An error occurred in the login route: {str(e)}")
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+@app.route('/auth/logout', methods=['POST'])
+def logout():
+    """Logout Endpoint - Revokes the active token."""
+    try:
+        token = request.headers.get('Authorization').split(' ')[1]  # Assuming it's a Bearer token
+        token_entry = Token.query.filter_by(token=token).first()
+
+        if token_entry:
+            token_entry.revoked = True  # Mark the token as revoked
+            db.session.commit()
+            return jsonify({"message": "Logout successful, token revoked"}), 200
+        else:
+            return jsonify({"error": "Token not found"}), 404
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/users/<username>', methods=['GET'])
+def get_user_by_username(username):
+    user = User.query.filter_by(username=username).first()
+    if user:
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'local_zipcode': user.local_zipcode
+        }
+        return jsonify(user_data)
+    else:
+        return jsonify({'message': 'User not found'}), 404
+
 
 
 @app.route("/dashboard", methods=["GET"])
@@ -185,117 +247,6 @@ def show_dashboard():
     return jsonify(dashboard_data), 200
 
 ############################## Post Routes
-
-# @app.route('/posts', methods=['GET'])
-# @jwt_required()  # Ensure the user is logged in
-# def get_posts():
-#     """Retrieve posts with pagination (for infinite scrolling)."""
-#     try:
-#         # Get the logged-in user from the JWT token
-#         current_user = get_jwt_identity()
-#         user = User.query.filter_by(username=current_user).first()
-
-#         if not user:
-#             return jsonify({"error": "User not found."}), 404
-
-#         # Check if the user has a ZIP code
-#         zip_code = user.local_zipcode
-#         if not zip_code:
-#             return jsonify({
-#                 "error": "You must set a ZIP code to view posts.",
-#                 "set_zip_button": {
-#                     "text": "Set Your ZIP Code",
-#                     "url": "/auth/signup"  # URL to sign up and get zipcode
-#                 }
-#             }), 400
-
-#         # If the user has a ZIP code, get the pagination params
-#         page = request.args.get('page', 1, type=int)
-#         per_page = request.args.get('per_page', 10, type=int)
-
-#         # Query posts for that ZIP code and paginate
-#         posts_query = Post.query.filter(Post.location == zip_code).paginate(page, per_page, False)
-
-#         if not posts_query.items:
-#             return jsonify({
-#                 "message": "No posts yet.",
-#                 "create_post_button": {
-#                     "text": "Create a Post",
-#                     "url": "/posts/create"
-#                 }
-#             }), 404
-
-#         # Prepare the posts data (include media if any)
-#         posts_data = []
-#         for post in posts_query.items:
-#             post_data = post.serialize()
-#             post_data["media"] = [media.serialize() for media in post.media]  # Including media data
-#             posts_data.append(post_data)
-
-#         return jsonify(posts_data)
-
-#     except Exception as e:
-#         app.logger.error(f"Error retrieving posts: {str(e)}")
-#         return jsonify({"error": str(e)}), 500
-
-# @app.route('/posts/create', methods=['POST'])
-# def create_new_post():
-#     """Create a new post."""
-#     try:
-#         # Get JSON data from the request
-#         data = request.get_json()
-
-#         # Validate JSON payload
-#         if not data:
-#             return jsonify({"error": "Invalid JSON payload"}), 400
-
-#         # Validate required fields
-#         if not data.get("location") or not data.get("user_id"):
-#             return jsonify({"error": "Missing required fields: location, user_id"}), 400
-
-#         # Optionally, validate other fields like 'content'
-#         if not data.get("content"):
-#             return jsonify({"error": "Missing required field: content"}), 400
-
-#         # Call the helper function to create the post
-#         post = create_post(data)
-
-#         # Return the created post with a 201 status code
-#         return jsonify(post.serialize()), 201
-#     except Exception as e:
-#         app.logger.error(f"Error creating post: {str(e)}")
-#         return jsonify({"error": str(e)}), 500
-
-
-# def create_post(data):
-#     """Helper function to create a new post."""
-#     try:
-#         app.logger.info(f"Creating post with data: {data}") 
-#         post = Post(
-#             location=data.get("location"),
-#             description=data.get("description"),
-#             user_id=data.get("user_id"),
-#             image_url=data.get("image_url", ""), 
-#             caption=data.get("caption"),      
-#             realtime_weather_id=data.get("realtime_weather_id") 
-#         )
-#         db.session.add(post)
-#         db.session.commit()
-        
-#         # Optionally handle media attachments if provided
-#         if data.get("media"):
-#             for media_data in data["media"]:
-#                 media = Media(
-#                     media_url=media_data["media_url"],
-#                     post_id=post.id
-#                 )
-#                 db.session.add(media)
-        
-#         return post
-#     except Exception as e:
-#         db.session.rollback()  
-#         app.logger.error(f"Error in create_post: {str(e)}. Data: {data}")  
-#         raise  # Re-raise the exception after logging it
 
 @app.route('/posts/create', methods=['POST'])
 @jwt_required()  # Ensure the user is logged in

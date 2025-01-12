@@ -1,11 +1,21 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 import UserContext from "./auth/UserContext"; 
 
+
+
 function Home() {
   const { currentUser } = useContext(UserContext);
+  const navigate = useNavigate(); 
   
+  
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to log out?")) {
+      localStorage.removeItem("token");
+      navigate("/Home");
+    }
+  };
 
   return (
     <div className="home-container">
@@ -23,9 +33,12 @@ function Home() {
         <Link to="/signup" className="home-link-button">Signup</Link>
         <Link to="/login" className="home-link-button">Login</Link>
         </p>
-        )}
-        
+       
+        )} 
       </div>
+      <button onClick={handleLogout} className="logout-button">
+          Logout
+      </button>
     </div>
   );
 }

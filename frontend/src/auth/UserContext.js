@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 
 /** Context: provides currentUser object and setter for it throughout app. */
 const UserContext = React.createContext();
@@ -7,11 +7,15 @@ const UserContext = React.createContext();
 export function UserProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null); 
 
+  // Memoize the context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({ currentUser, setCurrentUser }), [currentUser]);
+
   return (
-    <UserContext.Provider value={{ currentUser, setCurrentUser }}>
+    <UserContext.Provider value={value}>
       {children}
     </UserContext.Provider>
   );
 }
 
 export default UserContext;
+

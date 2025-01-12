@@ -31,25 +31,53 @@ function LoginForm({ login }) {
    */
   async function handleSubmit(e) {
     e.preventDefault();
-    setFormErrors([]);  
-    setIsLoading(true); 
+    
+    // Reset form errors and start loading state
+    setFormErrors([]);
+    setIsLoading(true);
+  
+    try {
+      // Call the login API
+      const result = await login(formData);
+      console.log("Login API result:", result);
+  
+      // After receiving the result, stop the loading spinner
+      setIsLoading(false);
+  
+      // Check if the result contains a success field and is true
+      if (result.success) {
+        // Destructure username and access_token from the result
+      const token = result.token
+      const { username, first_name, last_name, local_zipcode } = result.user;
 
-    const result = await login(formData); 
-    setIsLoading(false); 
+      // Log user and token for debugging
+      console.log("Destructured result:", { token, username, first_name, last_name, local_zipcode });
 
-    if (result.success) {
-      // Save user data and token to localStorage
-      const { userId, token } = result.data;  // Assuming this is returned from the login API
-      localStorage.setItem('userId', userId);
-      localStorage.setItem('token', token);
+        
+        // Check if both username and access_token are available
+        if (token && username) {
+          // Store the username and token in localStorage
+          localStorage.setItem('username', username); // Store username (if you need it)
+          localStorage.setItem('token', token); // Store the token
+  
 
-      // Redirect user to dashboard or back to the previous page
-      const redirectTo = urlParams.get('redirect') || '/dashboard';  // Optional redirect
-      navigate(redirectTo);  
-    } else {
-      setFormErrors(result.errors || ['Login failed. Please try again.']);  
+          navigate('/dashboard');
+
+        } else {
+          // Handle the case where username or access_token are missing
+          setFormErrors(['Login failed. Missing userId or token.']);
+        }
+      } else {
+        // Handle the case where the login was unsuccessful
+        setFormErrors([result?.error || 'An error occurred during login.']);
+      }
+    } catch (error) {
+      // Handle any other unexpected errors
+      setIsLoading(false);
+      setFormErrors([error.message || 'An unexpected error occurred.']);
     }
   }
+  
 
   /** Update form data on change */
   function handleChange(e) {
@@ -105,5 +133,3 @@ function LoginForm({ login }) {
 }
 
 export default LoginForm;
-
-

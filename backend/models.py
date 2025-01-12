@@ -13,10 +13,28 @@ class User(db.Model):
     local_zipcode = db.Column(db.String(5), nullable=False)
     posts = db.relationship('Post', backref='user', lazy=True, cascade="all, delete-orphan")
     
+
     
     def __repr__(self):
         return f"<User {self.username}>"
 
+class Token(db.Model):
+    __tablename__ = 'tokens'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(512), nullable=False, unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expiry = db.Column(db.DateTime, nullable=True)  # Optional expiry field
+    revoked = db.Column(db.Boolean, default=False)  # Flag for token revocation
+    
+    user = db.relationship('User', backref=db.backref('tokens', lazy=True))
+
+    def __repr__(self):
+        return f"<Token {self.token}>"
+
+    def is_revoked(self):
+        return self.revoked
 
 class Post(db.Model):
     __tablename__ = "post"

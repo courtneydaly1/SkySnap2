@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, Routes, Route } from 'react-router-dom';
 import WeatherApi from './api';
 import UserContext from './auth/UserContext';
@@ -13,31 +13,30 @@ import Dashboard from "./Dashboard";
 import WeatherPage from './WeatherPage';
 import Posts from "./Posts"; 
 import CreatePost from "./CreatePost"; 
+import ProtectedRoute from './ProtectedRoute';
 export const TOKEN_STORAGE_ID = 'token';
 
 function App() {
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
   const [infoLoaded, setInfoLoaded] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useLocalStorage(TOKEN_STORAGE_ID);
-  const [user, setUser] = useLocalStorage('user');
 
+  // UseEffect to load user info based on the token
   useEffect(() => {
     console.debug('App useEffect loadUserInfo', 'token=', token);
+    console.debug('Token from localStorage:', token);
 
     async function getCurrentUser() {
       if (token) {
         try {
-          // Decode the token to get the username
           const decodedToken = jwt.decode(token);
-          console.log(decodedToken);
           if (decodedToken) {
             WeatherApi.token = token;
-            // Optionally: fetch current user data if needed
-            // const currentUser = await WeatherApi.getCurrentUser(decodedToken.sub);
-            // setCurrentUser(currentUser);
+            const user = await WeatherApi.getCurrentUser(decodedToken.sub);
+            setCurrentUser(user);
           } else {
-            console.error('Invalid token: no username found.');
+            console.error('There is an error with the token. It has likely expired');
             setCurrentUser(null);
           }
         } catch (err) {
@@ -48,22 +47,21 @@ function App() {
       setInfoLoaded(true);
     }
 
-    setInfoLoaded(false);
     getCurrentUser();
   }, [token]);
 
   function handleLogout() {
     setCurrentUser(null);
-    setToken(null);
-    navigate('/');  
+    setToken(null); // Clear the token from localStorage
+    navigate('/Home');  // Redirect to home page
   }
 
   async function signup(signupData) {
     try {
-      // Call the API to sign up and get the token
-      let token = await WeatherApi.signup(signupData);
-      setToken(token);
-      return { success: true };  
+      const response = await WeatherApi.signup(signupData);
+      setToken(response.token);
+      setCurrentUser(response.user);
+      return { success: true, ...response };
     } catch (e) {
       console.error('Signup failed', e?.message || e);
       return { success: false, errors: [e?.message || "An error occurred during signup."] };
@@ -72,14 +70,17 @@ function App() {
 
   async function login(loginData) {
     try {
-      let response = await WeatherApi.login(loginData);
+      const response = await WeatherApi.login(loginData);
       setToken(response.access_token);
-      setUser(JSON.stringify(response));
-      setCurrentUser(response);
-      return { success: true };
+      setCurrentUser(response.user);
+      
+      navigate('/dashboard')
+      
+      return { success: true, ...response };
+
     } catch (e) {
-      console.error('Login failed', e?.message || e);
-      return { success: false, e: e?.message || e };
+      console.error('Login failed:', e);
+      return { success: false, error: e instanceof Error ? e.message : e };
     }
   }
 
@@ -90,26 +91,27 @@ function App() {
       <UserContext.Provider value={{ currentUser, setCurrentUser }}>
         <Navigation logout={handleLogout} />
         <Routes>
-          {/* Home route */}
           <Route path="/" element={<Home />} />
-
-          {/* Login route */}
           <Route path="/login" element={<LoginForm login={login} />} />
-
-          {/* Signup route */}
           <Route path="/signup" element={<SignupForm signup={signup} />} />
-
-          {/* Dashboard route */}
-          <Route path="/dashboard" element={<Dashboard user={currentUser} />} />
-
-          {/* Weather Page route */}
-          <Route path="/weather" element={<WeatherPage />} />
-
-          {/* Posts route
-          <Route path="/posts" element={<Posts zipcode={user.local_zipcode}/>} /> */}
-
-          {/* Create Post route */}
-          <Route path="/posts/create" element={<CreatePost />} />
+          
+          {/* Use ProtectedRoute for protected routes */}
+          <Route 
+            path="/dashboard" 
+            element={<ProtectedRoute element={<Dashboard user={currentUser} />} />} 
+          />
+          <Route 
+            path="/weather" 
+            element={<ProtectedRoute element={<WeatherPage />} />} 
+          />
+          <Route 
+            path="/posts" 
+            element={<ProtectedRoute element={<Posts zipcode={currentUser?.local_zipcode} />} />} 
+          />
+          <Route 
+            path="/posts/create" 
+            element={<ProtectedRoute element={<CreatePost />} />} 
+          />
         </Routes>
       </UserContext.Provider>
     </div>
@@ -117,3 +119,4 @@ function App() {
 }
 
 export default App;
+
