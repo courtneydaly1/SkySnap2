@@ -3,7 +3,7 @@ from flask import jsonify, request
 from flask_cors import cross_origin
 import json
 from services.weather_services import *
-# from services.post_services import create_post
+from services.post_services import create_post
 from services.user_services import create_user, login_user
 from models import Post, User, Media, WeeklyWeather, DailyWeather, RealtimeWeather, Token
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -12,9 +12,11 @@ from werkzeug.utils import secure_filename
 import os
 import uuid
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import joinedload
 from app import app
 import jwt
 from werkzeug.security import generate_password_hash
+
 
 
 # Define allowed image and video file types
@@ -311,7 +313,6 @@ def get_posts():
 
         # Check if the user has a ZIP code
         zip_code = request.args.get('zip_code')  # Get the zip_code from query string
-
         if not zip_code:
             return jsonify({
                 "error": "You must provide a zip code to view posts."
@@ -320,9 +321,17 @@ def get_posts():
         # If the user has a ZIP code, get the pagination params
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
+        
+         # Validate pagination parameters
+        if page <= 0 or per_page <= 0:
+            return jsonify({"error": "Invalid pagination parameters."}), 400
+
 
         # Query posts for that ZIP code and paginate
-        posts_query = Post.query.filter(Post.location == zip_code).paginate(page=page, per_page=per_page, error_out=False)
+        posts_query = Post.query.options(
+            joinedload(Post.media),  # Eager load media related to each post
+            joinedload(Post.realtime_weather)  # Eager load realtime_weather related to each post
+        ).filter(Post.location == zip_code).paginate(page=page, per_page=per_page, error_out=False)
 
         if not posts_query.items:
             return jsonify({

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom'; // useLocation to get URL parameters
 import './Posts.css';
 
+
 function Posts() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -10,7 +11,7 @@ function Posts() {
   const [hasMore, setHasMore] = useState(true);
   const [zipCode, setZipCode] = useState(null); 
   const navigate = useNavigate();
-  const location = useLocation(); // To access the current location and query params
+  const location = useLocation(); 
 
   const fetchPosts = useCallback(async (zipCode, pageNumber) => {
     setLoading(true);
@@ -35,8 +36,8 @@ function Posts() {
       }
 
       const data = await response.json();
-      if (data.message) {
-        setHasMore(false);
+      if (data.message === "No posts yet."){
+        setHasMore(false)
       } else {
         setPosts((prevPosts) => [...prevPosts, ...data]);
       }
@@ -46,13 +47,8 @@ function Posts() {
       setLoading(false);
     }
   }, []);
-
-  const handleSetZipCode = () => {
-    navigate('/auth/signup');
-  };
-
+  // When the component mounts or the URL changes, fetch the posts for the zipCode
   useEffect(() => {
-    // Retrieve the zip_code from the query parameters
     const queryParams = new URLSearchParams(location.search);
     const zipCodeFromUrl = queryParams.get('zip_code');
     
@@ -63,6 +59,12 @@ function Posts() {
       setError('ZIP Code is missing.');
     }
   }, [location.search, fetchPosts, page]);
+
+
+  const handleSetZipCode = () => {
+    navigate('/auth/signup');
+  };
+
 
   const loadMore = () => {
     if (!loading && hasMore) {
@@ -87,6 +89,7 @@ function Posts() {
           <button onClick={() => navigate('/posts/create')}>Create a Post</button>
         </div>
       ) : (
+        // display list of posts
         <div className="posts-list">
           {posts.map((post) => (
             <div key={post.id} className="post-card">
@@ -108,6 +111,11 @@ function Posts() {
       )}
 
       {loading && <p>Loading more posts...</p>}
+      {hasMore && !loading && (
+        <button onClick={loadMore} className="load-more-button">
+          Load More Posts
+        </button>
+    )}
 
       <div id="load-more" style={{ height: '50px' }} />
     </div>

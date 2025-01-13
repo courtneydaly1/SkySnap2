@@ -17,6 +17,15 @@ class User(db.Model):
     
     def __repr__(self):
         return f"<User {self.username}>"
+    
+    def serialize(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'local_zipcode': self.local_zipcode,
+        }
 
 class Token(db.Model):
     __tablename__ = 'tokens'
@@ -63,8 +72,8 @@ class Post(db.Model):
             'image_url': self.image_url,
             'caption': self.caption,
             'realtime_weather': {
-                'id': self.realtime_weather.id,
-                'temperature': self.realtime_weather.temperature,
+            'id': self.realtime_weather.id,
+            'temperature': self.realtime_weather.temperature,
             } if self.realtime_weather else None,
         }
 
@@ -93,6 +102,14 @@ class WeeklyWeather(db.Model):
 
     def __repr__(self):
         return f"<WeeklyWeather {self.week_start_date} - {self.location}>"
+    def serialize(self):
+        return {
+            'id': self.id,
+            'location': self.location,
+            'week_start_date': self.week_start_date.isoformat(),
+            'forecast': [day.serialize() for day in self.forecast],  
+        }
+
 
 class DailyWeather(db.Model):
     __tablename__ = "daily_weather"
@@ -110,10 +127,27 @@ class DailyWeather(db.Model):
     windSpeed = db.Column(db.Float)
     visibility = db.Column(db.DateTime)
     sunset = db.Column(db.DateTime)
-    weekly_weather_id = db.Column(db.Integer, db.ForeignKey('weekly_weather.id'))
+    weekly_weather_id = db.Column(db.Integer, db.ForeignKey('weekly_weather.id'), nullable=True)
 
     def __repr__(self):
         return f"<DailyWeather {self.time}>"
+    def serialize(self):
+        return {
+            'id': self.id,
+            'time': self.time.isoformat(),
+            'location_name': self.location_name,
+            'temperatureLow': self.temperatureLow,
+            'temperatureHigh': self.temperatureHigh,
+            'temperatureApparent': self.temperatureApparent,
+            'precipitation': self.precipitation,
+            'humidity': self.humidity,
+            'cloudBase': self.cloudBase,
+            'uvIndex': self.uvIndex,
+            'windSpeed': self.windSpeed,
+            'visibility': self.visibility,
+            'sunset': self.sunset.isoformat() if self.sunset else None,
+        }
+
 
 class RealtimeWeather(db.Model):
     __tablename__ = 'realtime_weather'

@@ -3,6 +3,14 @@ import axios from "axios";
 // Set up the base URL for the API
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:5000";
 
+class ApiError extends Error {
+  constructor(message, category) {
+    super(message); // Pass message to the parent Error constructor
+    this.name = "ApiError"; 
+    this.category = category; 
+  }
+}
+
 /** API Class. */
 class WeatherApi {
   static token = localStorage.getItem('token');  // Attempt to load token from localStorage
@@ -60,14 +68,20 @@ class WeatherApi {
         if (err.response.status >= 500) errorCategory = 'server';
         if (err.response.status === 404) errorCategory = 'notFound';
         if (err.response.status === 401) errorCategory = 'unauthorized';
+        if (err.response.status === 400) errorCategory = 'badRequest';
       } else if (err.message) {
         message = err.message;
         errorCategory = 'network';
+        if (err.message.includes("timeout")) {
+          message = "Request timed out. Please try again.";
+          errorCategory = "timeout";
+        }
       }
 
-      throw { message: Array.isArray(message) ? message : [message], category: errorCategory };
+      // Now throwing an instance of ApiError instead of a plain object
+      throw new ApiError(message, errorCategory);
     }
-  }
+  }  
 
   // Refactor repeated CRUD methods into one
   static async crudRequest(endpoint, data = {}, method = "get") {
