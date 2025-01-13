@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Routes, Route } from 'react-router-dom';
 import WeatherApi from './api';
 import UserContext from './auth/UserContext';
@@ -24,7 +24,6 @@ function App() {
 
   // UseEffect to load user info based on the token
   useEffect(() => {
-    console.debug('App useEffect loadUserInfo', 'token=', token);
     console.debug('Token from localStorage:', token);
 
     async function getCurrentUser() {
@@ -50,6 +49,13 @@ function App() {
     getCurrentUser();
   }, [token]);
 
+  // Automatically navigate to the dashboard after the currentUser is set
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/dashboard');
+    }
+  }, [currentUser, navigate]);
+
   function handleLogout() {
     setCurrentUser(null);
     setToken(null); // Clear the token from localStorage
@@ -71,10 +77,13 @@ function App() {
   async function login(loginData) {
     try {
       const response = await WeatherApi.login(loginData);
-      debugger;
-      setToken(response.token);
+      console.log('Login Response:', response);
+
+      localStorage.setItem(TOKEN_STORAGE_ID, response.token);
+      WeatherApi.setToken(response.token);
       setCurrentUser(response.user);
-      
+      console.log("User after login:", response.user);
+
       navigate('/dashboard')
       
       return { success: true, ...response };

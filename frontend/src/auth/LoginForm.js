@@ -15,7 +15,6 @@ import Alert from "../common/Alert";
  */
 
 function LoginForm({ login }) {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({ 
     username: '', 
     password: '' 
@@ -46,19 +45,19 @@ function LoginForm({ login }) {
   
       // Check if the result contains a success field and is true
       if (result.success) {
+        console.log("Login successful, redirecting to dashboard page.")
         // Destructure username and access_token from the result
-      const token = result.token
-      const { username, first_name, last_name, local_zipcode } = result.user;
+        const token = result.token
+        const { username, first_name, last_name, local_zipcode } = result.user;
 
-      // Log user and token for debugging
-      console.log("Destructured result:", { token, username, first_name, last_name, local_zipcode });
+        // Log user and token for debugging
+        console.log("Destructured result:", { token, username, first_name, last_name, local_zipcode });
 
         
         // Check if both username and access_token are available
         if (token && username) {
           // Store the username and token in localStorage
-          localStorage.setItem('username', username); 
-          debugger;
+          localStorage.setItem('username', username);
           localStorage.setItem('token', token);
           localStorage.setItem('first_name', first_name); 
           localStorage.setItem('last_name', last_name);
@@ -66,7 +65,7 @@ function LoginForm({ login }) {
          
   
 
-          navigate('/dashboard');
+          // navigate('/dashboard');
 
         } else {
           // Handle the case where username or access_token are missing

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
@@ -9,9 +9,10 @@ function Dashboard() {
   const [forecast, setForecast] = useState(null);
   const navigate = useNavigate();
 
-  const fetchUserData = async () => {
+  // Memoize the fetchUserData function to avoid unnecessary re-renders
+  const fetchUserData = useCallback(async () => {
     const token = localStorage.getItem("token");
-    console.log("Token before fetching user data:", token); // Log token
+    console.log("Token before fetching user data:", token);
 
     if (!token) {
       console.error("No token found, redirecting to login.");
@@ -48,16 +49,17 @@ function Dashboard() {
         navigate("/login");  // Redirect if token is missing
       }
     }
-  };
+  }, [navigate]); // Only re-run if navigate changes
 
   // UseEffect to call fetchUserData when the component mounts
   useEffect(() => {
     fetchUserData(); // This will run the function when the component is loaded
-  }, []);  // Empty dependency array means it runs once on component mount
+  }, [fetchUserData]); // Adding fetchUserData as a dependency
 
   const fetchForecast = async () => {
     try {
       const token = localStorage.getItem("token");
+      debugger;
       if (!token) throw new Error("No token found. Please log in.");
 
       const response = await fetch("http://127.0.0.1:5000/weather", {
@@ -134,6 +136,7 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
 
 
 
