@@ -25,7 +25,7 @@ function App() {
   // Load user info based on the token once when the component mounts
   useEffect(() => {
     async function getCurrentUser() {
-      if (token) {
+      if (token && !currentUser) {
         try {
           const decodedToken = jwt.decode(token);
           if (decodedToken) {
@@ -34,37 +34,32 @@ function App() {
             setCurrentUser(user);
           } else {
             console.error('Invalid or expired token');
-            setCurrentUser(null);
           }
         } catch (err) {
           console.error('Error loading user info:', err);
-          setCurrentUser(null);
         }
       }
       setInfoLoaded(true);
     }
 
     getCurrentUser();
-  }, [token]);  
+  }, [token, currentUser]);  
 
   // Automatically navigate to the dashboard or /post/create if the user is logged in
   useEffect(() => {
-    if (currentUser) {
+    if (infoLoaded && currentUser) {
       const currentPath = window.location.pathname;
-      
-      // Navigate to /post/create if the user is logged in and it's the right route
       if (currentPath === '/post/create') {
         navigate('/post/create');
-
       } else if (currentPath === '/posts'){
         navigate('/posts')
       } else if (currentPath === '/login'){
         navigate('/login')
-      } else if (currentPath !== '/dashboard') {
-        navigate('/dashboard'); // Navigate to /dashboard if the user is logged in
+      } else if (currentPath === '/dashboard') {
+        navigate('/dashboard');
       } 
     }
-  }, [currentUser, navigate]);  
+  }, [currentUser, navigate, infoLoaded]);  
 
   function handleLogout() {
     setCurrentUser(null);
