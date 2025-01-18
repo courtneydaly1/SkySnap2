@@ -1,14 +1,14 @@
 from app import app, db
 import requests
+from requests.models import Response
 from models import RealtimeWeather, DailyWeather, User
 from flask import jsonify
 import logging
 from flask_jwt_extended import get_jwt_identity
 from datetime import datetime
-import re
 
 WEATHER_API_KEY = app.config['WEATHER_API_KEY']
-BASE_URL = "https://api.tomorrow.io/v4/weather/"
+BASE_URL = "https://api.tomorrow.io/v4/weather"
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -27,11 +27,12 @@ def fetch_weather_data(endpoint: str, params: dict) -> dict:
     url = f"{BASE_URL}/{endpoint}"
     headers = {"accept": "application/json"}
     try:
+        logging.info(f"Fetching weather data from {url} with params: {params}")
         response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        logging.error(f"Error fetching data from {endpoint}: {e}")
+        logging.error(f"Error fetching data from {url} with params {params}: {e}")
         return None
 
 def get_user_zipcode() -> str:
@@ -45,111 +46,13 @@ def get_user_zipcode() -> str:
     user = User.query.filter_by(username=username).first()
 
     if not user:
-        raise ValueError("User not found.")
-    if not user.local_zipcode or len(user.local_zipcode) != 5 or not user.local_zipcode.isdigit():
-        raise ValueError("Invalid or missing ZIP code in user profile.")
+        return jsonify({"error": "User not found."}), 404
 
-    return user.local_zipcode
+    zipcode = user.local_zipcode
+    if not zipcode or len(zipcode) != 5 or not zipcode.isdigit():
+        return jsonify({"error": "Invalid or missing ZIP code in user profile."}), 400
 
-def get_daily_forecast() -> dict:
-    """
-    Fetch and save the daily weather forecast for the user's location.
-    
-    Returns:
-        dict or None: The API response data or None if there was an error.
-    """
-    try:
-        zipcode = get_user_zipcode()
-    except ValueError as e:
-        logging.error(e)
-        return jsonify({"error": str(e)}), 400
-
-    params = {'location': zipcode, 'timestep': '1d', 'apikey': WEATHER_API_KEY, 'units': 'imperial'}
-    data = fetch_weather_data("forecast", params)
-
-    if not data or 'timelines' not in data or 'daily' not in data['timelines']:
-        logging.error("Error: 'daily' not found in API response")
-        return None
-
-    forecast_entries = data['timelines']['daily']
-    location_data = {"name": f"ZIP {zipcode}"}
-    save_weather_data(forecast_entries, DailyWeather, location_data, "daily")
-    return data
-
-def get_realtime_forecast() -> dict:
-    """
-    Fetch and save real-time weather forecast data for the user's location.
-
-    Returns:
-        dict or None: The API response data or None if there was an error.
-    """
-    try:
-        zipcode = get_user_zipcode()
-    except ValueError as e:
-        logging.error(e)
-        return jsonify({"error": str(e)}), 400
-
-    params = {'location': zipcode, 'timestep': '1h', 'apikey': WEATHER_API_KEY}
-    data = fetch_weather_data("forecast", params)
-
-    if not data or 'timelines' not in data or 'minutely' not in data['timelines']:
-        logging.error("Error: 'minutely' not found in API response")
-        return None
-
-    forecast_entries = data['timelines']['minutely']
-    location_data = {"name": f"ZIP {zipcode}", "lat": None, "lon": None}
-    save_weather_data(forecast_entries, RealtimeWeather, location_data, "real-time")
-    return data
-
-def handle_user_zipcode_forecast() -> dict:
-    """
-    Fetch the 5-day weather forecast for the logged-in user's ZIP code.
-
-    Returns:
-        dict: JSON response containing the 5-day weather forecast or an error message.
-    """
-    try:
-        zipcode = get_user_zipcode()
-    except ValueError as e:
-        logging.error(e)
-        return jsonify({"error": str(e)}), 400
-
-    params = {
-        'location': zipcode,
-        'timestep': '1d',
-        'apikey': WEATHER_API_KEY
-    }
-
-    weather_data = fetch_weather_data("forecast", params)
-
-    if not weather_data or 'timelines' not in weather_data or 'daily' not in weather_data['timelines']:
-        return jsonify({"error": "Unable to fetch the weather forecast. Please try again later."}), 500
-
-    forecast_entries = weather_data['timelines']['daily']
-    location_data = {"name": f"ZIP {zipcode}", "lat": None, "lon": None}
-
-    try:
-        save_weather_data(forecast_entries, DailyWeather, location_data, "daily")
-    except Exception as e:
-        logging.error(f"Error saving forecast data: {e}")
-        return jsonify({"error": "An error occurred while saving the forecast data."}), 500
-
-    formatted_forecast = [
-        {
-            "date": entry.get('time'),
-            "temperatureHigh": entry['values'].get('temperatureMax'),
-            "temperatureLow": entry['values'].get('temperatureMin'),
-            "conditions": entry['values'].get('weatherCode')
-        }
-        for entry in forecast_entries
-    ]
-
-    return jsonify({
-        "message": "5-day weather forecast fetched successfully.",
-        "location": f"ZIP {zipcode}",
-        "forecast": formatted_forecast
-    }), 200
-
+    return zipcode
 
 def save_weather_data(entries: list, model, location_data: dict, weather_type: str):
     """
@@ -171,127 +74,121 @@ def save_weather_data(entries: list, model, location_data: dict, weather_type: s
             **entry['values']
         )
         weather_entries.append(weather_entry)
-    
+
     # Use bulk save to improve performance
     db.session.bulk_save_objects(weather_entries)
     db.session.commit()
     logging.info(f"{weather_type.capitalize()} forecast data saved successfully.")
 
-
-def get_weather_history(location: str) -> dict:
+def get_weather_forecast(weather_type: str) -> dict:
     """
-    Fetch recent weather history.
-
+    Fetch weather data based on the weather type ('real-time' or 'daily') for the user's location.
+    
     Args:
-        location (str): The location for the weather history.
-
+        weather_type (str): The type of weather data ('real-time' or 'daily').
+        
     Returns:
         dict or None: The API response data or None if there was an error.
     """
-    params = {'location': location, 'apikey': WEATHER_API_KEY}
-    return fetch_weather_data("history/recent", params)
-
-
-def handleZipcode(zipcode):
     try:
-        # Fetch weather data using existing service functions
-        forecast = fetch_weather_data(zipcode)
-        # Convert to JSON-like dictionary
-        return {
-            "forecast": forecast,
-            "message": f"Weather data for {zipcode}",
-        }
-    except Exception as e:
-        return {"error": f"Unable to fetch weather data: {str(e)}"}
+        zipcode = get_user_zipcode()
+    except ValueError as e:
+        logging.error(e)
+        return jsonify({"error": str(e)}), 400
 
+    timestep = '1h' if weather_type == 'real-time' else '1d'
+    params = {'location': zipcode, 'timestep': timestep, 'apikey': WEATHER_API_KEY}
+    data = fetch_weather_data("forecast", params)
 
-def handle_user_zipcode():
+    if not data or 'timelines' not in data or (weather_type == 'real-time' and 'minutely' not in data['timelines']) or (weather_type == 'daily' and 'daily' not in data['timelines']):
+        logging.error(f"Error: '{weather_type}' not found in API response")
+        return jsonify({"error": f"Unable to fetch {weather_type} weather data."}), 500
+
+    forecast_entries = data['timelines'][weather_type]
+    location_data = {"name": f"ZIP {zipcode}", "lat": None, "lon": None}
+    save_weather_data(forecast_entries, RealtimeWeather if weather_type == 'real-time' else DailyWeather, location_data, weather_type)
+    return jsonify({
+        "message": f"{weather_type.capitalize()} weather forecast fetched successfully.",
+        "forecast": forecast_entries
+    }), 200
+
+def handle_user_zipcode_forecast() -> dict:
     """
-    Fetch the 5-day weather forecast using the logged-in user's ZIP code.
-
+    Fetch the 5-day weather forecast for the logged-in user's ZIP code.
+    
     Returns:
         dict: JSON response containing the 5-day weather forecast or an error message.
     """
-    # Retrieve the current user
-    username = get_jwt_identity()
-    user = User.query.filter_by(username=username).first()
+    return get_weather_forecast('daily')
 
-    if not user:
-        return jsonify({"error": "User not found."}), 404
+def handle_user_realtime_forecast() -> dict:
+    """
+    Fetch real-time weather data for the logged-in user's ZIP code.
+    
+    Returns:
+        dict: JSON response containing the real-time weather data or an error message.
+    """
+    return get_weather_forecast('real-time')
 
-    if not user.local_zipcode or len(user.local_zipcode) != 5:
-        return jsonify({"error": "User's ZIP code is not set or invalid."}), 400
+def fetch_and_store_weather(zipcode: str) -> dict:
+    """
+    Fetch and store weather data for the given ZIP code.
 
-    zipcode = user.local_zipcode
+    Args:
+        zipcode (str): The ZIP code to fetch the weather for.
 
-    # Parameters for the API call
-    params = {
-        'location': zipcode,
-        'timestep': '1d',
-        'apikey': WEATHER_API_KEY
-    }
-
-    # Fetch weather data
+    Returns:
+        dict: A response containing the stored weather data or an error message.
+    """
+    params = {'location': zipcode, 'apikey': WEATHER_API_KEY}
     weather_data = fetch_weather_data("forecast", params)
-
-    if not weather_data or 'timelines' not in weather_data or 'daily' not in weather_data['timelines']:
-        return jsonify({"error": "Unable to fetch the weather forecast. Please try again later."}), 500
-
-    forecast_entries = weather_data['timelines']['daily']
-    location_data = weather_data.get('location', {})
-
-    # Save weather data to the database
-    try:
-        save_weather_data(forecast_entries, DailyWeather, location_data, "daily")
-    except Exception as e:
-        logging.error(f"Error saving forecast data: {e}")
-        return jsonify({"error": "An error occurred while saving the forecast data."}), 500
-
-    # Format the forecast for a user-friendly response
-    formatted_forecast = []
-    for entry in forecast_entries:
-        formatted_forecast.append({
-            "date": entry.get('time'),
-            "temperatureHigh": entry['values'].get('temperatureMax'),
-            "temperatureLow": entry['values'].get('temperatureMin'),
-            "conditions": entry['values'].get('weatherCode')
-        })
-
-    return jsonify({
-        "message": "5-day weather forecast fetched successfully.",
-        "location": location_data.get('name', f"ZIP {zipcode}"),
-        "forecast": formatted_forecast
-    }), 200
-
-def fetch_and_store_weather(zipcode):
-    response = handleZipcode(zipcode)  
-    weather_data = response.json() if isinstance(response, Response) else response
-
-    if "error" in weather_data:
-        raise ValueError(weather_data["error"])
+    
+    if not weather_data:
+        return jsonify({"error": "Unable to fetch weather data for this location."}), 500
 
     # Save to the RealtimeWeather model
     weather = RealtimeWeather(
         time=datetime.utcnow(),
-        location_name=weather_data["location_name"],
-        lat=weather_data["lat"],
-        lon=weather_data["lon"],
-        cloudBase=weather_data.get("cloudBase"),
-        cloudCeiling=weather_data.get("cloudCeiling"),
-        cloudCover=weather_data.get("cloudCover"),
-        dewPoint=weather_data.get("dewPoint"),
-        humidity=weather_data.get("humidity"),
-        precipitationProbability=weather_data.get("precipitationProbability"),
-        pressureSurfaceLevel=weather_data.get("pressureSurfaceLevel"),
-        temperature=weather_data.get("temperature"),
-        windSpeed=weather_data.get("windSpeed"),
-        windDirection=weather_data.get("windDirection"),
-        uvIndex=weather_data.get("uvIndex"),
-        weatherCode=weather_data.get("weatherCode"),
-        visibility=weather_data.get("visibility"),
+        location_name=f"ZIP {zipcode}",
+        lat=None,
+        lon=None,
+        **weather_data
     )
     db.session.add(weather)
     db.session.commit()
 
-    return weather.serialize()
+    return jsonify(weather.serialize()), 200
+
+def handleZipcode(zipcode: str) -> dict:
+    """
+    Fetch weather data for a specific ZIP code.
+
+    Args:
+        zipcode (str): The ZIP code to fetch weather data for.
+        
+    Returns:
+        dict: Weather data or error message.
+    """
+    params = {'location': zipcode, 'apikey': WEATHER_API_KEY}
+    weather_data = fetch_weather_data("forecast", params)
+
+    if not weather_data:
+        return jsonify({"error": "Unable to fetch weather data."}), 500
+
+    # Format and return data
+    formatted_forecast = [
+        {
+            "date": entry.get('time'),
+            "temperatureHigh": entry['values'].get('temperatureMax'),
+            "temperatureLow": entry['values'].get('temperatureMin'),
+            "conditions": entry['values'].get('weatherCode')
+        }
+        for entry in weather_data.get('timelines', {}).get('daily', [])
+    ]
+
+    return jsonify({
+        "message": "Weather data fetched successfully",
+        "forecast": formatted_forecast
+    }), 200
+
 

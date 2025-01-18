@@ -5,6 +5,8 @@ import UserContext from './auth/UserContext';
 function ProtectedRoute({ element, ...props }) {
   const { currentUser } = useContext(UserContext);
 
+  
+  
   // If there is no currentUser (i.e., the user is not logged in), redirect to login
   if (!currentUser) {
     return <Navigate to="/login" replace />;

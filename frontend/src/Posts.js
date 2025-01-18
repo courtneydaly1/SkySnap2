@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom'; // useLocation to get URL parameters
+import { useNavigate, useLocation } from 'react-router-dom'; 
 import './Posts.css';
-
 
 function Posts() {
   const [posts, setPosts] = useState([]);
@@ -11,7 +10,8 @@ function Posts() {
   const [hasMore, setHasMore] = useState(true);
   const [zipCode, setZipCode] = useState(null); 
   const navigate = useNavigate();
-  const location = useLocation(); 
+  const location = useLocation();
+   
 
   const fetchPosts = useCallback(async (zipCode, pageNumber) => {
     setLoading(true);
@@ -28,16 +28,19 @@ function Posts() {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
+          'X-Zip-Code': zipCode,
         },
       });
-
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
 
       const data = await response.json();
-      if (data.message === "No posts yet."){
-        setHasMore(false)
+      debugger;
+      if (data.message === "No posts yet.") {
+        setHasMore(false);
+        console.log("No posts, redirecting to /posts/create");
+        navigate('/posts/create');
       } else {
         setPosts((prevPosts) => [...prevPosts, ...data]);
       }
@@ -46,7 +49,8 @@ function Posts() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [navigate]);
+
   // When the component mounts or the URL changes, fetch the posts for the zipCode
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -60,11 +64,9 @@ function Posts() {
     }
   }, [location.search, fetchPosts, page]);
 
-
   const handleSetZipCode = () => {
     navigate('/auth/signup');
   };
-
 
   const loadMore = () => {
     if (!loading && hasMore) {
@@ -85,11 +87,13 @@ function Posts() {
         </div>
       ) : posts.length === 0 ? (
         <div className="no-posts">
-          <p>No posts yet.</p>
-          <button onClick={() => navigate('/posts/create')}>Create a Post</button>
+          <p>No posts yet for your ZIP code. You can create a post below!</p>
+          <button onClick={() => navigate('/posts/create')} className="create-post-button">
+            Create a Post
+          </button>
         </div>
       ) : (
-        // display list of posts
+        // Display list of posts if they exist
         <div className="posts-list">
           {posts.map((post) => (
             <div key={post.id} className="post-card">
@@ -115,7 +119,7 @@ function Posts() {
         <button onClick={loadMore} className="load-more-button">
           Load More Posts
         </button>
-    )}
+      )}
 
       <div id="load-more" style={{ height: '50px' }} />
     </div>
@@ -123,3 +127,5 @@ function Posts() {
 }
 
 export default Posts;
+
+

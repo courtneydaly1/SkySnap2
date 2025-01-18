@@ -72,8 +72,8 @@ class Post(db.Model):
             'image_url': self.image_url,
             'caption': self.caption,
             'realtime_weather': {
-            'id': self.realtime_weather.id,
-            'temperature': self.realtime_weather.temperature,
+                'id': self.realtime_weather.id,
+                'temperature': self.realtime_weather.temperature,
             } if self.realtime_weather else None,
         }
 
@@ -127,7 +127,7 @@ class DailyWeather(db.Model):
     windSpeed = db.Column(db.Float)
     visibility = db.Column(db.DateTime)
     sunset = db.Column(db.DateTime)
-    weekly_weather_id = db.Column(db.Integer, db.ForeignKey('weekly_weather.id'), nullable=True)
+    weekly_weather_id = db.Column(db.Integer, db.ForeignKey('weekly_weather.id'))
 
     def __repr__(self):
         return f"<DailyWeather {self.time}>"

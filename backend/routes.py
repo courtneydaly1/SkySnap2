@@ -27,6 +27,8 @@ UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Limit to 16 MB
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -170,9 +172,8 @@ def login():
             "username": user['username'],
             "first_name": user['first_name'],
             "last_name": user['last_name'],
-            "local_zipcode": user.get('local_zipcode', '')  # Handle missing data gracefully
-        }), 200
-
+            "local_zipcode": user.get('local_zipcode', '')  
+        })
     except Exception as e:
         app.logger.error(f"An error occurred in the login route: {str(e)}")
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
@@ -223,6 +224,8 @@ def show_dashboard():
     zipcode = user.local_zipcode
     if not zipcode:
         return jsonify({"error": "User's ZIP code is not set"}), 400
+    zip_code = request.args.get('zip_code')
+    app.logger.info(f"Zip code from query: {zip_code}")
 
     # Fetch weather data and update the RealtimeWeather table
     try:
@@ -257,14 +260,14 @@ def create_new_post():
     """Create a new post with media upload."""
     try:
         # Get form data and file
-        data = request.form  # Get form data (text fields)
-        file = request.files.get('media')  # Get file data (if any)
+        data = request.form  
+        file = request.files.get('media') 
         
         # Validate required fields
         location = data.get('location')
         description = data.get('description')
         caption = data.get('caption')
-        user_id = get_jwt_identity()
+        username = get_jwt_identity()
         
         if not location or not description or not caption:
             return jsonify({"error": "Missing required fields: location, description, caption."}), 400
@@ -274,7 +277,7 @@ def create_new_post():
             location=location,
             description=description,
             caption=caption,
-            user_id=user_id
+            username=username
         )
 
         # Handle file upload (media file)
@@ -289,43 +292,46 @@ def create_new_post():
         db.session.commit()
 
         return jsonify(new_post.serialize()), 201
+    
     except SQLAlchemyError as e:
         db.session.rollback() 
         return jsonify({"error": "Database error: " + str(e)}), 500
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    
     except Exception as e:
         app.logger.error(f"Error creating post: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 
 @app.route('/posts', methods=['GET'])
-@jwt_required()  # Ensure the user is logged in
+@jwt_required()  
 def get_posts():
     """Retrieve posts with pagination (for infinite scrolling)."""
     try:
         # Get the logged-in user from the JWT token
         current_user = get_jwt_identity()
+        app.logger.info(f"Authenticated user: {current_user}")
+        
         user = User.query.filter_by(username=current_user).first()
 
         if not user:
             return jsonify({"error": "User not found."}), 404
 
-        # Check if the user has a ZIP code
-        zip_code = request.args.get('zip_code')  # Get the zip_code from query string
+        # Retrieve the zip code from the custom header
+        zip_code = request.args.get('zip_code')
         if not zip_code:
             return jsonify({
                 "error": "You must provide a zip code to view posts."
             }), 400
-
+        app.logger.info(f"Retrieving Zipcode: {zip_code}")
+        
+        
         # If the user has a ZIP code, get the pagination params
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
         
-         # Validate pagination parameters
+        # Validate pagination parameters
         if page <= 0 or per_page <= 0:
             return jsonify({"error": "Invalid pagination parameters."}), 400
-
 
         # Query posts for that ZIP code and paginate
         posts_query = Post.query.options(
@@ -340,13 +346,14 @@ def get_posts():
                     "text": "Create a Post",
                     "url": "/posts/create"
                 }
-            }), 404
+            }), 200
 
         # Prepare the posts data (include media if any)
         posts_data = []
         for post in posts_query.items:
             post_data = post.serialize()
-            post_data["media"] = [media.serialize() for media in post.media]  # Including media data
+            if post.media:
+                post_data["media"] = [media.serialize() for media in post.media] 
             posts_data.append(post_data)
 
         return jsonify(posts_data)
@@ -441,6 +448,8 @@ def get_user_forecast():
         return jsonify({
             "forecast": formatted_forecast
         })
+    except KeyError as e:
+        return jsonify({"error": f"Missing data from weather API: {str(e)}"}), 500
     except Exception as e:
         return jsonify({"error": f"Failed to fetch weather data: {str(e)}"}), 500
 

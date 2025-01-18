@@ -6,9 +6,9 @@ function CreatePost() {
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [caption, setCaption] = useState('');
-  const [media, setMedia] = useState(null);  // To store the selected media
+  const [media, setMedia] = useState(null);  
   const [error, setError] = useState('');
-  const [userId, setUserId] = useState(null);  // Store user_id here
+  const [username, setUsername] = useState(null);  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,8 +16,9 @@ function CreatePost() {
     const token = localStorage.getItem('token');  // Retrieve token
     if (token) {
       // Decode token to get user info (like user_id)
-      const user = JSON.parse(atob(token.split('.')[1]));  // Decode the JWT token
-      setUserId(user.id);  // Set the user id from token
+      const user = JSON.parse(atob(token.split('.')[1]));
+      debugger;  // Decode the JWT token
+      setUsername(user.username);  
     } else {
       setError('User not logged in.');
     }
@@ -35,11 +36,11 @@ function CreatePost() {
         location,
         description,
         caption,
-        userId,
+        username,
         media,
     });
 
-    if (!location || !description || !caption || !userId) {
+    if (!location || !description || !caption || !username) {
       setError('All fields are required.');
       return;
     }
@@ -55,7 +56,7 @@ function CreatePost() {
     formData.append('location', location);
     formData.append('description', description);
     formData.append('caption', caption);
-    formData.append('user_id', userId); 
+    formData.append('username', username); 
     if (media) {
       formData.append('media', media);
     }

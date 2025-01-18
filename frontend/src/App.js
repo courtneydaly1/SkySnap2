@@ -22,24 +22,22 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useLocalStorage(TOKEN_STORAGE_ID);
 
-  // UseEffect to load user info based on the token
+  // Load user info based on the token once when the component mounts
   useEffect(() => {
-    console.debug('Token from localStorage:', token);
-
     async function getCurrentUser() {
       if (token) {
         try {
           const decodedToken = jwt.decode(token);
           if (decodedToken) {
             WeatherApi.token = token;
-            const username = await WeatherApi.getCurrentUser(decodedToken.sub);
-            setCurrentUser(username);
+            const user = await WeatherApi.getCurrentUser(decodedToken.sub);
+            setCurrentUser(user);
           } else {
-            console.error('There is an error with the token. It has likely expired');
+            console.error('Invalid or expired token');
             setCurrentUser(null);
           }
         } catch (err) {
-          console.error('App loadUserInfo: problem loading', err);
+          console.error('Error loading user info:', err);
           setCurrentUser(null);
         }
       }
@@ -47,19 +45,31 @@ function App() {
     }
 
     getCurrentUser();
-  }, [token]);
+  }, [token]);  
 
-  // Automatically navigate to the dashboard after the currentUser is set
+  // Automatically navigate to the dashboard or /post/create if the user is logged in
   useEffect(() => {
     if (currentUser) {
-      navigate('/dashboard');
+      const currentPath = window.location.pathname;
+      
+      // Navigate to /post/create if the user is logged in and it's the right route
+      if (currentPath === '/post/create') {
+        navigate('/post/create');
+
+      } else if (currentPath === '/posts'){
+        navigate('/posts')
+      } else if (currentPath === '/login'){
+        navigate('/login')
+      } else if (currentPath !== '/dashboard') {
+        navigate('/dashboard'); // Navigate to /dashboard if the user is logged in
+      } 
     }
-  }, [currentUser, navigate]);
+  }, [currentUser, navigate]);  
 
   function handleLogout() {
     setCurrentUser(null);
-    setToken(null); // Clear the token from localStorage
-    navigate('/Home');  // Redirect to home page
+    setToken(null); 
+    navigate('/Home');
   }
 
   async function signup(signupData) {
@@ -84,10 +94,9 @@ function App() {
       setCurrentUser(response.user);
       console.log("User after login:", response.user);
 
-      navigate('/dashboard')
+      navigate('/dashboard');
       
       return { success: true, ...response };
-
     } catch (e) {
       console.error('Login failed:', e);
       return { success: false, error: e instanceof Error ? e.message : e };
@@ -129,4 +138,5 @@ function App() {
 }
 
 export default App;
+
 

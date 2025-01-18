@@ -22,7 +22,7 @@ def create_post():
         # Extract necessary fields
         location = data.get('location')
         description = data.get('description')
-        user_id = data.get('user_id')
+        username= data.get('username')
         image_url = data.get('image_url')
         caption = data.get('caption')
         realtime_weather_id = data.get('realtime_weather_id')
@@ -30,13 +30,13 @@ def create_post():
         # Validate required fields
         if not location:
             return jsonify({"error": "Location is required."}), 400
-        if not user_id:
-            return jsonify({"error": "User ID is required."}), 400
+        if not username:
+            return jsonify({"error": "Username is required."}), 400
 
         # Ensure the user exists
-        user = User.query.get(user_id)
+        user = User.query.get(username)
         if not user:
-            return jsonify({"error": "User not found."}), 404
+            return jsonify({"error": "Username not found."}), 404
 
         # Optional field validation: Ensure image_url, if provided, is a valid URL
         if image_url and not re.match(r"^https?://[^\s]+$", image_url):
@@ -52,7 +52,7 @@ def create_post():
         new_post = Post(
             location=location,
             description=description,
-            user_id=user_id,
+            user=username,
             image_url=image_url,
             caption=caption,
             realtime_weather_id=realtime_weather_id

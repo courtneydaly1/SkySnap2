@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
 function Dashboard() {
@@ -7,16 +7,16 @@ function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [forecast, setForecast] = useState(null);
+  const [posts, setPosts] = useState([]); 
+  const [showWeather, setShowWeather] = useState(false); 
   const navigate = useNavigate();
 
   // Memoize the fetchUserData function to avoid unnecessary re-renders
   const fetchUserData = useCallback(async () => {
     const token = localStorage.getItem("token");
-    console.log("Token before fetching user data:", token);
-
     if (!token) {
       console.error("No token found, redirecting to login.");
-      navigate("/login");  // Redirect to login if token is missing
+      navigate("/login"); 
       return;
     }
 
@@ -31,38 +31,53 @@ function Dashboard() {
         // Handle invalid or expired token
         if (response.status === 401) {
           console.error("Invalid or expired token.");
-          localStorage.removeItem("token");  // Remove the token
-          navigate("/login");  // Redirect to login
+          localStorage.removeItem("token"); 
+          navigate("/login");
           return;
         }
-
         throw new Error(`Error: ${response.statusText}`);
       }
 
       const data = await response.json();
       setUser(data.user);
       setIsLoading(false);
+      fetchPosts(data.user.local_zipcode); // Fetch posts based on the user's ZIP code
     } catch (err) {
       setError(err.message);
       setIsLoading(false);
       if (err.message === "No token found. Please log in.") {
-        navigate("/login");  // Redirect if token is missing
+        navigate("/login");
       }
     }
-  }, [navigate]); // Only re-run if navigate changes
+  }, [navigate]);
 
-  // UseEffect to call fetchUserData when the component mounts
-  useEffect(() => {
-    fetchUserData(); // This will run the function when the component is loaded
-  }, [fetchUserData]); // Adding fetchUserData as a dependency
+  // Fetch posts for the user based on their ZIP code
+  const fetchPosts = async (zipCode) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found. Please log in.");
 
+      const response = await fetch(`http://127.0.0.1:5000/posts?zip_code=${zipCode}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+      const data = await response.json();
+      setPosts(data); 
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  // Function to fetch the forecast data
   const fetchForecast = async () => {
     try {
       const token = localStorage.getItem("token");
-      debugger;
       if (!token) throw new Error("No token found. Please log in.");
 
-      const response = await fetch("http://127.0.0.1:5000/weather", {
+      const response = await fetch(`http://127.0.0.1:5000/weather?zip_code=${user.local_zipcode}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -76,6 +91,7 @@ function Dashboard() {
     }
   };
 
+  // Handle logout
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to log out?")) {
       localStorage.removeItem("token");
@@ -83,26 +99,43 @@ function Dashboard() {
     }
   };
 
+  // Handle Snaps link click to either view posts or create a new post
+  const handleSnapsClick = () => {
+    if (posts.length > 0) {
+      navigate(`/posts?zip_code=${user.local_zipcode}`); // Navigate to /posts if there are posts
+    } else {
+      navigate(`/posts/create`); // Navigate to create post page if no posts
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData(); // Fetch user data when component mounts
+  }, [fetchUserData]);
+
+  // Loading and error states
   if (isLoading) return <p>Loading user data...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
+  // Function to handle showing the weather forecast
+  const handleViewWeatherClick = () => {
+    fetchForecast();  // Fetch the forecast data when the button is clicked
+    setShowWeather(true); // Set the state to show the weather
+  };
+
   return (
     <div className="dashboard-container">
-      <h1 className="dashboard-title">Welcome, {user?.username || "User"}!</h1>
+      <h1 className="dashboard-title">Welcome, {user?.first_name || "User"}!</h1>
       <p className="dashboard-subtitle">You are logged in to SkySnap.</p>
       <div className="dashboard-links">
-        <button onClick={fetchForecast} className="dashboard-link-button">
+        <button onClick={handleViewWeatherClick} className="dashboard-link-button">
           View Weather
         </button>
-        <Link
-          to={`/posts?zip_code=${user.local_zipcode}`}
-          className="dashboard-link-button"
-        >
+        <button onClick={handleSnapsClick} className="dashboard-link-button">
           Snaps
-        </Link>
+        </button>
       </div>
 
-      {forecast && (
+      {showWeather && forecast && (
         <div className="forecast-container">
           <h2>5-Day Forecast for ZIP: {user.local_zipcode}</h2>
           <div className="forecast-cards">
@@ -136,9 +169,5 @@ function Dashboard() {
 }
 
 export default Dashboard;
-
-
-
-
 
 
