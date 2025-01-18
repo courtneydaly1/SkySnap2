@@ -27,7 +27,8 @@ function LoginForm({ login }) {
       if (result.success) {
         const { token, user } = result;
         if (token && user) {
-          const { username, first_name, last_name, local_zipcode } = user;
+          const { username, first_name, last_name, local_zipcode, id } = user;
+          localStorage.setItem('userId', id);
           localStorage.setItem('username', username);
           localStorage.setItem('token', token);
           localStorage.setItem('first_name', first_name);

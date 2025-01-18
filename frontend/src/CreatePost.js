@@ -8,7 +8,7 @@ function CreatePost() {
   const [caption, setCaption] = useState('');
   const [media, setMedia] = useState(null);  
   const [error, setError] = useState('');
-  const [username, setUsername] = useState(null);  
+  const [userId, setuserId] = useState(null);  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,7 +18,7 @@ function CreatePost() {
       // Decode token to get user info (like user_id)
       const user = JSON.parse(atob(token.split('.')[1]));
       debugger;  // Decode the JWT token
-      setUsername(user.username);  
+      setuserId(user.id);  
     } else {
       setError('User not logged in.');
     }
@@ -36,11 +36,11 @@ function CreatePost() {
         location,
         description,
         caption,
-        username,
+        userId,
         media,
     });
 
-    if (!location || !description || !caption || !username) {
+    if (!location || !description || !caption || !userId) {
       setError('All fields are required.');
       return;
     }
@@ -56,7 +56,7 @@ function CreatePost() {
     formData.append('location', location);
     formData.append('description', description);
     formData.append('caption', caption);
-    formData.append('username', username); 
+    formData.append('user_id', userId); 
     if (media) {
       formData.append('media', media);
     }
@@ -122,7 +122,7 @@ function CreatePost() {
           id="media"
           name="media"
           onChange={handleMediaChange}
-          accept="image/*,video/*"  // Accepts images and videos
+          accept="image/*,video/*"  
         />
         <button type="submit">Create Post</button>
       </form>
