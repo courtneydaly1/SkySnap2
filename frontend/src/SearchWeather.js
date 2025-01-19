@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SearchWeather.css"; // Update CSS filename if necessary
-import WeatherApi from "./api";
+
 
 function SearchWeather() {
   const [zipCode, setZipCode] = useState("");
@@ -9,7 +9,7 @@ function SearchWeather() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isZipCodeChanging, setIsZipCodeChanging] = useState(false);
-  const navigate = useNavigate();
+//   const navigate = useNavigate();
 
   // Function to fetch weather forecast based on zip code
   const fetchWeatherForecast = async (zip) => {
@@ -35,6 +35,7 @@ function SearchWeather() {
         });
   
         if (!response.ok) {
+        debugger;
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to fetch weather data.');
         }
