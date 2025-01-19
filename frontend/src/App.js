@@ -14,7 +14,9 @@ import WeatherPage from './WeatherPage';
 import Posts from "./Posts"; 
 import CreatePost from "./CreatePost"; 
 import ProtectedRoute from './ProtectedRoute';
+import SearchWeather from "./SearchWeather";
 export const TOKEN_STORAGE_ID = 'token';
+
 
 function App() {
   const navigate = useNavigate();
@@ -48,6 +50,7 @@ function App() {
   // Automatically navigate to the dashboard or /post/create if the user is logged in
   useEffect(() => {
     if (infoLoaded && currentUser) {
+      debugger;
       const currentPath = window.location.pathname;
       if (currentPath === '/post/create') {
         navigate('/post/create');
@@ -59,7 +62,7 @@ function App() {
         navigate('/dashboard');
       } 
     }
-  }, [currentUser, navigate, infoLoaded]);  
+  }, [currentUser, infoLoaded]);  
 
   function handleLogout() {
     setCurrentUser(null);
@@ -125,6 +128,9 @@ function App() {
           <Route 
             path="/posts/create" 
             element={<ProtectedRoute element={<CreatePost />} />} 
+          />
+          <Route 
+            exact path="/weather/search" component={<SearchWeather />} 
           />
         </Routes>
       </UserContext.Provider>

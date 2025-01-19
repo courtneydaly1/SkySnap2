@@ -132,8 +132,10 @@ def login_user(data):
                 "username": user.username,
                 "first_name": user.first_name,
                 "last_name": user.last_name,
+                "userId": user.id,
                 "local_zipcode": user.local_zipcode or ''  # Safely handle missing local_zipcode
-            }
+            }   
+            
 
         # Invalid password
         app.logger.error("Invalid password")

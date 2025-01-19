@@ -82,7 +82,7 @@ function SignupForm() {
             localStorage.setItem('local_zipcode', user.local_zipcode);
             localStorage.setItem('token', token);
 
-            console.log(localStorage); // Check if values are set correctly
+            console.log(localStorage); 
             navigate("/dashboard");
           }
         }

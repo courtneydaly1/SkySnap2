@@ -8,21 +8,21 @@ function CreatePost() {
   const [caption, setCaption] = useState('');
   const [media, setMedia] = useState(null);  
   const [error, setError] = useState('');
-  const [userId, setuserId] = useState(null);  
+  const [userId, setUserId] = useState(null);  
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get the user ID from the token (assuming it's stored in localStorage or sessionStorage)
-    const token = localStorage.getItem('token');  // Retrieve token
-    if (token) {
-      // Decode token to get user info (like user_id)
-      const user = JSON.parse(atob(token.split('.')[1]));
-      debugger;  // Decode the JWT token
-      setuserId(user.id);  
+    // Try to get the userId from localStorage
+    const storedUserId = localStorage.getItem('userId');
+    
+    // Check if the user is logged in
+    if (storedUserId) {
+      setUserId(storedUserId);
     } else {
-      setError('User not logged in.');
+      setError('User not logged in. Please log in first.');
+      navigate('/home');  // Redirect to home or login page if not logged in
     }
-  }, []);
+  }, [navigate]);
 
   const handleMediaChange = (e) => {
     setMedia(e.target.files[0]);  // Only store the first selected file
@@ -31,14 +31,6 @@ function CreatePost() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');  // Clear previous errors
-    // Log the current state values for debugging
-    console.log({
-        location,
-        description,
-        caption,
-        userId,
-        media,
-    });
 
     if (!location || !description || !caption || !userId) {
       setError('All fields are required.');
@@ -56,7 +48,7 @@ function CreatePost() {
     formData.append('location', location);
     formData.append('description', description);
     formData.append('caption', caption);
-    formData.append('user_id', userId); 
+    formData.append('user_id', userId);  
     if (media) {
       formData.append('media', media);
     }
@@ -90,46 +82,49 @@ function CreatePost() {
   return (
     <div className="create-post-container">
       <h1>Create a New Post</h1>
-      <form onSubmit={handleSubmit} className="create-post-form">
-        {error && <p className="error-message">{error}</p>}
-        <input
-          type="text"
-          id="location"
-          name="location"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          placeholder="Zipcode"
-          required
-        />
-        <textarea
-          id="description"
-          name="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Description of weather"
-          required
-        />
-        <textarea
-          id="caption"
-          name="caption"
-          value={caption}
-          onChange={(e) => setCaption(e.target.value)}
-          placeholder="Short caption"
-          required
-        />
-        <input
-          type="file"
-          id="media"
-          name="media"
-          onChange={handleMediaChange}
-          accept="image/*,video/*"  
-        />
-        <button type="submit">Create Post</button>
-      </form>
+      {error && <p className="error-message">{error}</p>}
+      {userId && (
+        <form onSubmit={handleSubmit} className="create-post-form">
+          <input
+            type="text"
+            id="location"
+            name="location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="Location/Zipcode"
+            required
+          />
+          <textarea
+            id="description"
+            name="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Description of the weather"
+            required
+          />
+          <textarea
+            id="caption"
+            name="caption"
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            placeholder="Short caption"
+            required
+          />
+          <input
+            type="file"
+            id="media"
+            name="media"
+            onChange={handleMediaChange}
+            accept="image/*,video/*"  
+          />
+          <button type="submit">Create Post</button>
+        </form>
+      )}
     </div>
   );
 }
 
 export default CreatePost;
+
 
 

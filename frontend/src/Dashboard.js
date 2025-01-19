@@ -12,14 +12,13 @@ function Dashboard() {
   const navigate = useNavigate();
 
   // Memoize the fetchUserData function to avoid unnecessary re-renders
-  const fetchUserData = useCallback(async () => {
+  const fetchUserData = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("No token found, redirecting to login.");
       navigate("/login"); 
       return;
     }
-
     try {
       const response = await fetch("http://127.0.0.1:5000/dashboard", {
         headers: {
@@ -41,15 +40,15 @@ function Dashboard() {
       const data = await response.json();
       setUser(data.user);
       setIsLoading(false);
-      fetchPosts(data.user.local_zipcode); // Fetch posts based on the user's ZIP code
+      fetchPosts(data.user.local_zipcode); 
     } catch (err) {
       setError(err.message);
       setIsLoading(false);
       if (err.message === "No token found. Please log in.") {
-        navigate("/login");
+        navigate("/login"); 
       }
     }
-  }, [navigate]);
+  };
 
   // Fetch posts for the user based on their ZIP code
   const fetchPosts = async (zipCode) => {
@@ -95,6 +94,12 @@ function Dashboard() {
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to log out?")) {
       localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("first_name");
+      localStorage.removeItem("last_name");
+      localStorage.removeItem("username");
+      localStorage.removeItem("local_zipcode");
+
       navigate("/login");
     }
   };
@@ -102,15 +107,16 @@ function Dashboard() {
   // Handle Snaps link click to either view posts or create a new post
   const handleSnapsClick = () => {
     if (posts.length > 0) {
-      navigate(`/posts?zip_code=${user.local_zipcode}`); // Navigate to /posts if there are posts
+      navigate(`/posts?zip_code=${user.local_zipcode}`); 
     } else {
-      navigate(`/posts/create`); // Navigate to create post page if no posts
+      navigate(`/posts/create`); 
     }
   };
 
   useEffect(() => {
+    debugger;
     fetchUserData(); // Fetch user data when component mounts
-  }, [fetchUserData]);
+  }, []);
 
   // Loading and error states
   if (isLoading) return <p>Loading user data...</p>;

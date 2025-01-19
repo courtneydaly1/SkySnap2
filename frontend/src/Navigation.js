@@ -16,7 +16,7 @@ function Navigation({ isLoggedIn, logout }) {
           <NavLink to="/posts" style={linkStyle} activestyle={activeLinkStyle}>
             My Posts
           </NavLink>
-          <NavLink to="/weather" style={linkStyle} activestyle={activeLinkStyle}>
+          <NavLink to="/weather/search" style={linkStyle} activestyle={activeLinkStyle}>
             Find Weather
           </NavLink>
         </>

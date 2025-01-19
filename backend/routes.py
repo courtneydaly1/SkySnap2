@@ -172,6 +172,7 @@ def login():
             "username": user['username'],
             "first_name": user['first_name'],
             "last_name": user['last_name'],
+            "userId": user['userId'],
             "local_zipcode": user.get('local_zipcode', '')  
         })
     except Exception as e:
@@ -267,7 +268,7 @@ def create_new_post():
         location = data.get('location')
         description = data.get('description')
         caption = data.get('caption')
-        username = get_jwt_identity()
+        user_id = data.get('user_id') 
         
         if not location or not description or not caption:
             return jsonify({"error": "Missing required fields: location, description, caption."}), 400
@@ -277,7 +278,7 @@ def create_new_post():
             location=location,
             description=description,
             caption=caption,
-            username=username
+            user_id=user_id
         )
 
         # Handle file upload (media file)
@@ -323,8 +324,6 @@ def get_posts():
                 "error": "You must provide a zip code to view posts."
             }), 400
         app.logger.info(f"Retrieving Zipcode: {zip_code}")
-        
-        
         # If the user has a ZIP code, get the pagination params
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
@@ -474,3 +473,30 @@ def get_forecast_by_zipcode():
     except Exception as e:
         return jsonify({"error": f"Failed to fetch weather data: {str(e)}"}), 500
 
+
+@app.route("/api/weather/<zipcode>", methods=["GET"])
+def get_weather(zipcode):
+    # Fetch weather data from an external API
+    url = f"https://api.tomorrow.io/v4/weather/forecast?location={zipcode}&apikey={TOMORROW_IO_API_KEY}"
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        return jsonify({"error": "Unable to fetch weather data"}), 500
+
+    weather_data = response.json()
+
+    # Fetch posts related to the zipcode (example)
+    posts = get_posts_for_zipcode(zipcode)
+
+    return jsonify({
+        "weather": weather_data,
+        "posts": posts
+    })
+
+def get_posts_for_zipcode(zipcode):
+    # Example: Retrieve posts for this zipcode from the database
+    # For now, returning mock data
+    return [
+        {"id": 1, "content": "Weather is looking good today!", "zipcode": zipcode},
+        {"id": 2, "content": "Hope the storm passes soon.", "zipcode": zipcode}
+    ]
