@@ -50,7 +50,6 @@ function App() {
   // Automatically navigate to the dashboard or /post/create if the user is logged in
   useEffect(() => {
     if (infoLoaded && currentUser) {
-      debugger;
       const currentPath = window.location.pathname;
       if (currentPath === '/post/create') {
         navigate('/post/create');
@@ -62,7 +61,7 @@ function App() {
         navigate('/dashboard');
       } 
     }
-  }, [currentUser, infoLoaded]);  
+  }, [currentUser, navigate, infoLoaded]);  
 
   function handleLogout() {
     setCurrentUser(null);
@@ -130,7 +129,7 @@ function App() {
             element={<ProtectedRoute element={<CreatePost />} />} 
           />
           <Route 
-            exact path="/weather/search" component={<SearchWeather />} 
+            exact path="/weather/search" element={<SearchWeather />} 
           />
         </Routes>
       </UserContext.Provider>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
@@ -11,7 +11,7 @@ function Dashboard() {
   const [showWeather, setShowWeather] = useState(false); 
   const navigate = useNavigate();
 
-  // Memoize the fetchUserData function to avoid unnecessary re-renders
+ 
   const fetchUserData = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -100,7 +100,7 @@ function Dashboard() {
       localStorage.removeItem("username");
       localStorage.removeItem("local_zipcode");
 
-      navigate("/login");
+      navigate("/");
     }
   };
 
