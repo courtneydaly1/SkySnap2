@@ -116,7 +116,6 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    debugger;
     fetchUserData(); // Fetch user data when component mounts
   }, []);
 

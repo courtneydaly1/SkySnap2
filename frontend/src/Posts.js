@@ -36,7 +36,6 @@ function Posts() {
       }
 
       const data = await response.json();
-      debugger;
       if (data.message === "No posts yet.") {
         setHasMore(false);
         console.log("No posts, redirecting to /posts/create");

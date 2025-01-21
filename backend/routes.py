@@ -403,23 +403,29 @@ def real_time_forecast2():
 @jwt_required()
 def get_user_forecast():
     """
-    Fetch and return the 1-day forecast for the logged-in user's local ZIP code.
+    Fetch and return the 1-day forecast based on the provided zip code or user's local zip code.
     """
+    # Get the logged-in user's username
     username = get_jwt_identity()
     user = User.query.filter_by(username=username).first()
 
     if not user:
         return jsonify({"error": "User not found."}), 404
 
-    zipcode = user.local_zipcode
-    if not zipcode or len(zipcode) != 5:
-        return jsonify({"error": "Invalid or missing ZIP code for the user."}), 400
+    # Get the zip code from the query parameter, or fallback to user's stored zip code
+    zip_code = request.args.get('zip_code')  # Look for zip_code in query params
+    if not zip_code:
+        zip_code = user.local_zipcode  # Fallback to user's stored zip code
 
+    if not zip_code or len(zip_code) != 5:
+        return jsonify({"error": "Invalid or missing ZIP code."}), 400
+
+    # Fetch weather data for the selected ZIP code
     params = {
-        'location': zipcode,
+        'location': zip_code,
         'timesteps': '1d',
         'units': 'imperial',
-        'apikey': WEATHER_API_KEY
+        'apikey': WEATHER_API_KEY  # Make sure this API key is set correctly
     }
 
     try:
@@ -451,6 +457,7 @@ def get_user_forecast():
         return jsonify({"error": f"Missing data from weather API: {str(e)}"}), 500
     except Exception as e:
         return jsonify({"error": f"Failed to fetch weather data: {str(e)}"}), 500
+
 
 
 
