@@ -100,7 +100,9 @@ function Dashboard() {
       localStorage.removeItem("username");
       localStorage.removeItem("local_zipcode");
 
+      setUser(null);
       navigate("/");
+      window.location.reload();
     }
   };
 

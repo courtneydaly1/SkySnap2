@@ -66,7 +66,8 @@ function App() {
   function handleLogout() {
     setCurrentUser(null);
     setToken(null); 
-    navigate('/Home');
+    navigate('/');
+    window.location.reload();  
   }
 
   async function signup(signupData) {
@@ -105,7 +106,7 @@ function App() {
   return (
     <div className="App">
       <UserContext.Provider value={{ currentUser, setCurrentUser }}>
-        <Navigation logout={handleLogout} />
+        <Navigation logout={handleLogout} setCurrentUser={null} />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginForm login={login} />} />

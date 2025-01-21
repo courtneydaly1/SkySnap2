@@ -183,7 +183,7 @@ def login():
 def logout():
     """Logout Endpoint - Revokes the active token."""
     try:
-        token = request.headers.get('Authorization').split(' ')[1]  # Assuming it's a Bearer token
+        token = request.headers.get('Authorization').split(' ')[1]  
         token_entry = Token.query.filter_by(token=token).first()
 
         if token_entry:
