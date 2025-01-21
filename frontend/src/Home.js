@@ -1,10 +1,10 @@
 import React, { useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
-import UserContext from './auth/UserContext'; 
+import UserContext from './auth/UserContext'; // Import UserContext
 
 function Home() {
-  const { currentUser } = useContext(UserContext);  // Accessing currentUser from context
+  const { currentUser, setCurrentUser } = useContext(UserContext);  // Access currentUser and setCurrentUser from context
   const navigate = useNavigate();  // For navigating to different pages
 
   // Redirect if currentUser is not found (logged out or no session)
@@ -17,9 +17,17 @@ function Home() {
 
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to log out?")) {
-      // Remove user data from localStorage and navigate to home page
+      // Remove user data from localStorage
       localStorage.removeItem("token");
-      navigate('/'); // Redirecting to home page
+      
+      // Set currentUser to null using setCurrentUser from context
+      setCurrentUser(null);  // This will update the context and make currentUser null
+
+      // Optionally navigate to the home page
+      navigate("/");
+
+      // Optionally reload the page (this may be redundant if the state updates correctly)
+      window.location.reload();
     }
   };
 
