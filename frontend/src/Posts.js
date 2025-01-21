@@ -59,7 +59,7 @@ function Posts() {
       setZipCode(zipCodeFromUrl);
       fetchPosts(zipCodeFromUrl, page); 
     } else {
-      setError('ZIP Code is missing.');
+     <p></p>;
     }
   }, [location.search, fetchPosts, page]);
 
