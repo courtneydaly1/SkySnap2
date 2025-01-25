@@ -5,8 +5,8 @@
   margin: 0 auto;
   padding: 30px;
   background: linear-gradient(135deg, #e0f7fa, #ffeb3b); /* Sky-like gradient */
-  border-radius: 15px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   font-family: 'Arial', sans-serif;
   text-align: center;
   animation: fadeIn 1.5s ease-out;
@@ -24,22 +24,24 @@
 
 /* Heading style */
 h1 {
-  margin-bottom: 25px;
-  font-size: 2.5rem;
+  margin-bottom: 30px;
+  font-size: 2.6rem;
   color: #333;
   font-weight: bold;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   background: linear-gradient(90deg, #ff6347, #1e90ff); /* Gradient color for heading */
   -webkit-background-clip: text;
   color: transparent;
+  text-align: center;
+  padding: 5px 0;
 }
 
 /* Error message */
 .error-message {
   color: #f44336;
-  font-size: 14px;
-  margin-bottom: 15px;
+  font-size: 16px;
+  margin-bottom: 20px;
   font-weight: 600;
 }
 
@@ -47,36 +49,38 @@ h1 {
 .no-zipcode,
 .no-posts {
   text-align: center;
-  margin-top: 30px;
+  margin-top: 40px;
 }
 
 .no-zipcode p,
 .no-posts p {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   color: #555;
+  font-style: italic;
 }
 
 /* Button styles for no ZIP code and no posts */
 .no-zipcode button,
 .create-post-button,
 .load-more-button {
-  padding: 14px 28px;
+  padding: 14px 30px;
   background: linear-gradient(135deg, #3498db, #9b59b6); /* Vibrant gradient button */
   color: white;
   border: none;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   border-radius: 8px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 20px;
 }
 
 .no-zipcode button:hover,
 .create-post-button:hover,
 .load-more-button:hover {
   background: linear-gradient(135deg, #2980b9, #8e44ad);
-  transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* Posts list grid */
@@ -84,32 +88,36 @@ h1 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 25px;
-  margin-top: 25px;
+  margin-top: 30px;
 }
 
 /* Individual post card with pastel colors */
 .post-card {
   padding: 20px;
   border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   color: #333;
-  font-size: 1rem;
+  font-size: 1.1rem;
   background: linear-gradient(135deg, #f8f9fa, #f0e4d7);
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
 }
 
 /* Hover effect for post cards */
 .post-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-10px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
 }
 
 /* Post card title styling */
 .post-card h2 {
   margin: 0;
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: bold;
   color: #333;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ddd;
 }
 
 /* Random pastel background colors for each card with unique color */
@@ -171,11 +179,24 @@ h1 {
   font-style: italic;
 }
 
-/* Style for the 'Load More Posts' button */
-.load-more-button {
+/* ZIP Code input styling */
+.zipcode-input {
   margin-top: 20px;
-  margin-right: 30px;
   padding: 14px 28px;
+  font-size: 1.1rem;
+  color: rgb(7, 0, 0);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  width: 250px;
+  margin-right: 10px;
+}
+
+/* Style for the 'Load More Posts' button */
+.load-more-button,
+.zipcode-search-btn {
+  margin-top: 20px;
+  padding: 14px 30px;
   font-size: 1.1rem;
   color: white;
   background: linear-gradient(135deg, #ff6347, #1e90ff);
@@ -198,14 +219,48 @@ h1 {
   }
 
   h1 {
-    font-size: 2rem;
+    font-size: 2.1rem;
   }
 
   .no-zipcode button,
   .create-post-button,
   .load-more-button {
-    padding: 12px 22px;
+    padding: 12px 24px;
     font-size: 1rem;
+  }
+
+  .post-card {
+    padding: 18px;
+  }
+
+  .post-card h2 {
+    font-size: 1.5rem;
+  }
+
+  .post-card p {
+    font-size: 1rem;
+  }
+
+  .post-weather {
+    font-size: 0.9rem;
+  }
+
+  .zipcode-input {
+    width: 200px;
+  }
+}
+
+/* For small screens (mobile phones) */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  .no-zipcode button,
+  .create-post-button,
+  .load-more-button {
+    padding: 10px 22px;
+    font-size: 0.95rem;
   }
 
   .post-card {
@@ -223,58 +278,50 @@ h1 {
   .post-weather {
     font-size: 0.85rem;
   }
-}
 
-/* For small screens (mobile phones) */
-@media (max-width: 480px) {
-  h1 {
-    font-size: 1.8rem;
-  }
-
-  .no-zipcode button,
-  .create-post-button,
-  .load-more-button {
-    padding: 10px 20px;
-    font-size: 0.95rem;
-  }
-
-  .post-card {
-    padding: 12px;
-  }
-
-  .post-card h2 {
-    font-size: 1.3rem;
-  }
-
-  .post-card p {
-    font-size: 0.9rem;
-  }
-
-  .post-weather {
-    font-size: 0.8rem;
+  .zipcode-input {
+    width: 180px;
   }
 }
 
+/* Create Post button */
 .create-post-btn {
-  padding: 14px 28px;
-  background: linear-gradient(135deg, #3498db, #9b59b6); /* Gradient matching the "Create Post" button */
+  padding: 14px 30px;
+  background: linear-gradient(135deg, #3498db, #9b59b6);
   color: white;
-  border: none;
   font-size: 1.1rem;
   font-weight: bold;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.3s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 25px; /* Space at the bottom of the button */
+  margin-top: 20px;
+  margin-left: 5px;
 }
 
 .create-post-btn:hover {
-  background: linear-gradient(135deg, #2980b9, #8e44ad); /* Darker gradient on hover */
-  transform: translateY(-4px);
+  background: linear-gradient(135deg, #2980b9, #8e44ad);
+  transform: translateY(-5px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-.create-post-btn:focus {
-  outline: none;
+/* Top buttons container */
+.top-buttons {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.zipcode-search {
+  margin-bottom: 20px;
+  display: inline-block;
+  background: transparent;
+}
+
+.zipcode-input {
+  margin-right: 10px;
+}
+
+/* Adjustments for buttons */
+.create-post-btn {
+  margin-top: 20px;
 }

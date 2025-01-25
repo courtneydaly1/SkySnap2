@@ -4,7 +4,7 @@
     max-width: 1200px; /* Increased max-width for a larger box */
     margin: 0 auto;
     padding: 40px 30px; /* Increased padding for a larger feel */
-    background: linear-gradient(135deg, #e8f4f8, #f0f9ff);
+    background: linear-gradient(135deg, #87CEEB, #B0E0E6); /* Sky-inspired gradient */
     border-radius: 15px; /* Slightly larger border radius */
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15); /* Deeper shadow for more prominence */
     font-family: Arial, sans-serif;
@@ -12,13 +12,15 @@
     transition: background-color 0.3s ease;
 }
 
+/* Title */
 .search-weather-container h1 {
     font-size: 2.4rem; /* Increased font size for the title */
-    color: #333;
+    color: #2E8B57; /* Sky green for a pop of color */
     margin-bottom: 30px; /* Added more margin for spacing */
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 /* Form styling */
@@ -26,28 +28,30 @@
     display: flex;
     justify-content: center;
     margin-bottom: 35px; /* More space between form and other content */
+    gap: 15px; /* Added gap between input and button */
 }
 
 .search-weather-container input {
     padding: 12px;
     font-size: 1.2rem; /* Larger font size for better readability */
     width: 300px; /* Increased width for the input box */
-    border: 1px solid #bdc3c7;
+    border: 1px solid #87CEEB; /* Light sky blue border */
     border-radius: 5px;
     outline: none;
     transition: border-color 0.3s ease;
+    box-sizing: border-box;
 }
 
 .search-weather-container input:focus {
-    border-color: #3498db;
+    border-color: #1E90FF; /* Bright blue when focused */
 }
 
+/* Button */
 .search-weather-container button {
-    margin-left: 20px;
     padding: 12px 24px; /* Larger button size */
     font-size: 1.2rem; /* Larger text inside the button */
     color: white;
-    background-color: #3498db;
+    background-color: #1E90FF; /* Sky blue button */
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -55,24 +59,24 @@
 }
 
 .search-weather-container button:disabled {
-    background-color: #bdc3c7;
+    background-color: #BDC3C7;
     cursor: not-allowed;
 }
 
 .search-weather-container button:hover:enabled {
-    background-color: #2980b9;
+    background-color: #4682B4; /* Darker blue on hover */
     transform: translateY(-2px); /* Button lift effect */
 }
 
 /* Error and loading states */
 .search-weather-container p {
-    color: #e74c3c;
+    color: #E74C3C; /* Red for error messages */
     font-weight: bold;
     font-size: 1.1rem; /* Slightly larger error message font */
 }
 
 .search-weather-container p.loading {
-    color: #2980b9;
+    color: #1E90FF; /* Blue for loading text */
 }
 
 /* Forecast section styling */
@@ -91,14 +95,14 @@
 .forecast-cards {
     display: flex;
     justify-content: flex-start;
-    gap: 5px;
+    gap: 15px; /* Small gap between cards */
     margin-top: 30px;
     overflow-x: auto;
     padding-bottom: 15px;
 }
 
 .forecast-card {
-    background-color: #ffffff;
+    background: linear-gradient(135deg, #ADD8E6, #E0FFFF); /* Light sky blue to light cyan gradient */
     padding: 15px;
     border-radius: 10px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15); /* Larger shadow for more depth */
@@ -107,18 +111,19 @@
     text-align: left;
     min-width: 180px;
     flex-shrink: 0;
-    margin-right: 5px;
+    margin-right: 15px; /* Added margin to right side */
 }
 
 .forecast-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .forecast-card h3 {
     font-size: 1.2rem; /* Slightly larger card title */
-    color: #2c3e50;
+    color: #2E8B57; /* Sky green for the card title */
     margin-bottom: 12px; /* More space below title */
+    font-weight: bold;
 }
 
 .forecast-card p {
@@ -142,7 +147,7 @@
     }
 
     .forecast-cards {
-        gap: 10px; /* Small gap between cards on smaller screens */
+        gap: 15px; /* Adjust gap between cards */
     }
 
     .forecast-card {
@@ -162,7 +167,7 @@
     }
 
     .search-weather-container input {
-        width: 90%;
+        width: 80%; /* Reduce width on smaller screens */
     }
 }
 

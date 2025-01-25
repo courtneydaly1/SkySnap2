@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate, useLocation } from 'react-router-dom'; 
 import './Posts.css';
 
 function Posts() {
@@ -11,15 +11,23 @@ function Posts() {
   const [hasMore, setHasMore] = useState(true);
   const [userId, setUserId] = useState(null); // For checking if the user is logged in
   const navigate = useNavigate();
+  const location = useLocation(); // To access the URL query parameters
 
   useEffect(() => {
     // Try to get the userId from localStorage
     const storedUserId = localStorage.getItem('userId');
-    
     if (storedUserId) {
       setUserId(storedUserId);
     }
-  }, []);
+
+    // Extract the zip_code from the query string if available
+    const params = new URLSearchParams(location.search);
+    const zipFromQuery = params.get('zip_code');
+    if (zipFromQuery) {
+      setZipCode(zipFromQuery);
+      fetchPosts(zipFromQuery, 1); // Fetch posts directly based on the zip code from URL
+    }
+  }, [location.search]);
 
   // Function to fetch posts based on zip code and page number
   const fetchPosts = useCallback(async (zipCode, pageNumber) => {
@@ -60,7 +68,7 @@ function Posts() {
     }
   }, []);
 
-  // Handle search button click
+  // Handle search button click (if a user wants to search manually)
   const handleSearch = () => {
     if (zipCode) {
       setPosts([]); // Clear previous posts when starting new search
@@ -68,6 +76,13 @@ function Posts() {
       fetchPosts(zipCode, 1); // Fetch posts for the entered zip code
     } else {
       setError('Please enter a valid ZIP code.');
+    }
+  };
+
+  // Handle "Enter" key press for search input
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleSearch(); // Trigger the search on Enter key
     }
   };
 
@@ -86,31 +101,37 @@ function Posts() {
 
   return (
     <div className="posts-container">
-      <h1>Search Posts by ZIP Code</h1>
-      
-      {/* Input for ZIP Code */}
-      <div className="zipcode-search">
-        <input
-          type="text"
-          value={zipCode}
-          onChange={(e) => setZipCode(e.target.value)}
-          placeholder="Enter ZIP Code"
-          disabled={loading}
-        />
-        <button onClick={handleSearch} disabled={loading}>
-          Search
-        </button>
+      {/* Buttons at the top */}
+      <div className="top-buttons">
+        <h1>Search Snaps by ZIP Code</h1>
+        
+        {/* Input for ZIP Code (only visible if the user wants to manually search) */}
+        <div className="zipcode-search">
+          <input
+            type="text"
+            value={zipCode}
+            onChange={(e) => setZipCode(e.target.value)}
+            placeholder="Enter ZIP Code"
+            disabled={loading}
+            className='zipcode-input'
+            onKeyDown={handleKeyDown}  // Listen for "Enter" key press
+          />
+          <button className="zipcode-search-btn" onClick={handleSearch} disabled={loading}>
+            Search
+          </button>
+        </div>
+
+        {/* Create Post Button - Only visible if user is logged in */}
+        {userId && (
+          <button className="create-post-btn" onClick={handleCreatePost}>
+            Create a New Snap
+          </button>
+        )}
       </div>
 
+      {/* Error and Loading Message */}
       {error && <p className="error-message">{error}</p>}
-      
       {loading && <p>Loading posts...</p>}
-
-      {posts.length === 0 && !loading && !error && (
-        <div className="no-posts">
-          <p>No posts found for this ZIP code. Try searching again!</p>
-        </div>
-      )}
 
       {/* Display list of posts */}
       <div className="posts-list">
@@ -133,20 +154,11 @@ function Posts() {
         </button>
       )}
 
-      {/* Create Post Button - Only visible if user is logged in */}
-      {userId && (
-        <button className="create-post-btn" onClick={handleCreatePost}>
-          Create a New Post
-        </button>
-      )}
-
       <div id="load-more" style={{ height: '50px' }} />
     </div>
   );
 }
 
 export default Posts;
-
-
 
 

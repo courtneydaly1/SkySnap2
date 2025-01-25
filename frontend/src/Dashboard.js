@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
@@ -11,8 +11,7 @@ function Dashboard() {
   const [showWeather, setShowWeather] = useState(false); 
   const navigate = useNavigate();
 
- 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("No token found, redirecting to login.");
@@ -27,7 +26,6 @@ function Dashboard() {
       });
 
       if (!response.ok) {
-        // Handle invalid or expired token
         if (response.status === 401) {
           console.error("Invalid or expired token.");
           localStorage.removeItem("token"); 
@@ -48,9 +46,8 @@ function Dashboard() {
         navigate("/login"); 
       }
     }
-  };
+  }, [navigate]);
 
-  // Fetch posts for the user based on their ZIP code
   const fetchPosts = async (zipCode) => {
     try {
       const token = localStorage.getItem("token");
@@ -70,7 +67,6 @@ function Dashboard() {
     }
   };
 
-  // Function to fetch the forecast data
   const fetchForecast = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -84,13 +80,12 @@ function Dashboard() {
 
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
       const data = await response.json();
-      setForecast(data.forecast);
+      setForecast(data.forecast);  
     } catch (err) {
       setError(err.message);
     }
   };
 
-  // Handle logout
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to log out?")) {
       localStorage.removeItem("token");
@@ -102,32 +97,28 @@ function Dashboard() {
 
       setUser(null);
       navigate("/");
-      window.location.reload();
+      window.location.reload(); 
     }
   };
 
-  // Handle Snaps link click to either view posts or create a new post
+  // Handle Snaps button click to navigate directly to posts with the user's zip code
   const handleSnapsClick = () => {
-    if (posts.length > 0) {
-      navigate(`/posts?zip_code=${user.local_zipcode}`); 
-    } else {
-      navigate(`/posts/create`); 
+    if (user?.local_zipcode) {
+      navigate(`/posts?zip_code=${user.local_zipcode}`);  // Navigate to the posts page with the user's zip code
     }
   };
 
   useEffect(() => {
-    fetchUserData(); // Fetch user data when component mounts
-  }, []);
+    fetchUserData();  
+  }, [fetchUserData]);
 
-  // Loading and error states
+  const handleViewWeatherClick = () => {
+    fetchForecast();  
+    setShowWeather(true);  
+  };
+
   if (isLoading) return <p>Loading user data...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
-
-  // Function to handle showing the weather forecast
-  const handleViewWeatherClick = () => {
-    fetchForecast();  // Fetch the forecast data when the button is clicked
-    setShowWeather(true); // Set the state to show the weather
-  };
 
   return (
     <div className="dashboard-container">
@@ -176,5 +167,3 @@ function Dashboard() {
 }
 
 export default Dashboard;
-
-

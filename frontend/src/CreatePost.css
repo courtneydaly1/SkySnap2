@@ -1,143 +1,217 @@
-.create-post-container {
+/* search-weather-container styles */
+.search-weather-container {
   width: 100%;
-  max-width: 800px;
+  max-width: 1200px; /* Increased max-width for a larger box */
   margin: 0 auto;
-  padding: 30px;
-  background: linear-gradient(135deg, #e0f7fa, #ffeb3b); /* Sky-like gradient */
-  border-radius: 15px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-  font-family: 'Arial', sans-serif;
+  padding: 40px 30px; /* Increased padding for a larger feel */
+  background: linear-gradient(135deg, #87CEEB, #B0E0E6); /* Sky-inspired gradient */
+  border-radius: 15px; /* Slightly larger border radius */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15); /* Deeper shadow for more prominence */
+  font-family: Arial, sans-serif;
   text-align: center;
-  animation: fadeIn 1.5s ease-out;
+  transition: background-color 0.3s ease;
 }
 
-.create-post-container h1 {
-  font-size: 2.5rem;
-  color: #333;
+/* Title */
+.search-weather-container h1 {
+  font-size: 2.4rem; /* Increased font size for the title */
+  color: #2E8B57; /* Sky green for a pop of color */
+  margin-bottom: 30px; /* Added more margin for spacing */
   font-weight: bold;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  background: linear-gradient(90deg, #ff6347, #1e90ff); /* Gradient color for heading */
-  -webkit-background-clip: text;
-  color: transparent;
-  margin-bottom: 25px;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.error-message {
-  color: #f44336;
-  font-size: 14px;
-  margin-bottom: 15px;
-  font-weight: 600;
-}
-
-.create-post-form {
+/* Form styling */
+.search-weather-container form {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  margin-bottom: 35px; /* More space between form and other content */
+  gap: 15px; /* Added gap between input and button */
 }
 
-.form-input,
-.form-textarea,
-.form-file-input {
-  margin-bottom: 15px;
+.search-weather-container input {
   padding: 12px;
-  font-size: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  font-size: 1.2rem; /* Larger font size for better readability */
+  width: 300px; /* Increased width for the input box */
+  border: 1px solid #87CEEB; /* Light sky blue border */
+  border-radius: 5px;
   outline: none;
-  transition: all 0.3s ease;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
 }
 
-.form-input:focus,
-.form-textarea:focus,
-.form-file-input:focus {
-  border-color: #3498db;
+.search-weather-container input:focus {
+  border-color: #1E90FF; /* Bright blue when focused */
 }
 
-.form-textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.submit-btn {
-  padding: 14px 28px;
-  background: linear-gradient(135deg, #3498db, #9b59b6); /* Vibrant gradient button */
+/* Button */
+.search-weather-container button {
+  padding: 12px 24px; /* Larger button size */
+  font-size: 1.2rem; /* Larger text inside the button */
   color: white;
+  background-color: #1E90FF; /* Sky blue button */
   border: none;
-  border-radius: 8px;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 1.1rem;
   transition: background-color 0.3s ease, transform 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.submit-btn:hover {
-  background: linear-gradient(135deg, #2980b9, #8e44ad);
-  transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+.search-weather-container button:disabled {
+  background-color: #BDC3C7;
+  cursor: not-allowed;
 }
 
-.media-preview {
+.search-weather-container button:hover:enabled {
+  background-color: #4682B4; /* Darker blue on hover */
+  transform: translateY(-2px); /* Button lift effect */
+}
+
+/* Error and loading states */
+.search-weather-container p {
+  color: #E74C3C; /* Red for error messages */
+  font-weight: bold;
+  font-size: 1.1rem; /* Slightly larger error message font */
+}
+
+.search-weather-container p.loading {
+  color: #1E90FF; /* Blue for loading text */
+}
+
+/* Forecast section styling */
+.forecast-container {
+  margin-top: 40px;
+}
+
+.forecast-container h2 {
+  font-size: 1.7rem; /* Increased font size for the forecast title */
+  color: #333;
+  margin-bottom: 25px; /* Added more margin */
+  font-weight: bold;
+}
+
+/* Forecast cards layout */
+.forecast-cards {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); /* 6 cards per row */
+  gap: 15px;
+  justify-items: center;
   margin-top: 20px;
-  text-align: center;
+  margin-bottom: 20px;
 }
 
-.media-image {
-  max-width: 100%;
-  border-radius: 6px;
-  margin-top: 10px;
+/* Base forecast card styles */
+.forecast-card {
+  padding: 15px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 180px; /* Smaller card width */
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
+  cursor: pointer;
+  text-align: left;
 }
 
-.media-video {
-  max-width: 100%;
-  border-radius: 6px;
-  margin-top: 10px;
+/* Hover effect for the forecast cards */
+.forecast-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
 }
 
-/* Keyframe for fade-in effect */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+/* Title and data in forecast card */
+.forecast-card h3 {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: bold;
 }
 
-/* Media Queries for responsiveness */
+.forecast-card .weather-data {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 10px;
+}
 
-/* For medium screens (tablets) */
+.forecast-card li {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+/* Different card colors based on the weather */
+.forecast-card:nth-child(odd) {
+  background-color: #FF7F50; /* Coral for odd cards */
+}
+
+.forecast-card:nth-child(even) {
+  background-color: #FF6347; /* Tomato for even cards */
+}
+
+.forecast-card:nth-child(3n) {
+  background-color: #F39C12; /* Golden for every third card */
+}
+
+.forecast-card:nth-child(4n) {
+  background-color: #1ABC9C; /* Turquoise for every fourth card */
+}
+
+.forecast-card:nth-child(5n) {
+  background-color: #9B59B6; /* Purple for every fifth card */
+}
+
+.forecast-card:nth-child(6n) {
+  background-color: #2980B9; /* Blue for every sixth card */
+}
+
+.forecast-card li span {
+  font-weight: bold;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
-  .create-post-container {
-    padding: 20px;
+  .search-weather-container h1 {
+      font-size: 2rem; /* Adjusted size for better readability */
   }
 
-  .submit-btn {
-    font-size: 1rem;
+  .forecast-cards {
+      gap: 15px; /* Adjust gap between cards */
   }
 
-  .form-input,
-  .form-textarea,
-  .form-file-input {
-    font-size: 0.95rem;
-    padding: 10px;
+  .forecast-card {
+      min-width: 160px; /* Adjust card size for smaller screens */
+  }
+
+  .forecast-container h2 {
+      font-size: 1.5rem;
+  }
+
+  .forecast-card h3 {
+      font-size: 1.1rem;
+  }
+
+  .forecast-card p {
+      font-size: 1rem;
+  }
+
+  .search-weather-container input {
+      width: 80%; /* Reduce width on smaller screens */
   }
 }
 
-/* For small screens (mobile phones) */
 @media (max-width: 480px) {
-  .create-post-container {
-    padding: 15px;
+  .search-weather-container h1 {
+      font-size: 1.7rem;
   }
 
-  .submit-btn {
-    padding: 12px 24px;
-    font-size: 0.95rem;
+  .forecast-container h2 {
+      font-size: 1.2rem;
   }
 
-  .form-input,
-  .form-textarea,
-  .form-file-input {
-    font-size: 0.9rem;
-    padding: 8px;
+  .forecast-card h3 {
+      font-size: 1rem;
+  }
+
+  .forecast-card p {
+      font-size: 0.9rem;
   }
 }
