@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom"; // Import to access the query params
+import { useLocation } from "react-router-dom"; 
 import "./SearchWeather.css";
 
 function SearchWeather() {
@@ -18,7 +18,7 @@ function SearchWeather() {
     const zipParam = params.get("zip_code");
     if (zipParam) {
       setZipCode(zipParam); // Set zipCode if provided in query params
-      fetchWeatherForecast(zipParam); // Fetch weather based on the zip code
+      fetchWeatherForecast(zipParam); 
     }
   }, [location.search]); // Re-run the effect if location changes
 
@@ -115,7 +115,7 @@ function SearchWeather() {
           </div>
         </div>
       ) : (
-        <p>No forecast available.</p>
+        <p></p>
       )}
     </div>
   );

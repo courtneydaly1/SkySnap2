@@ -6,16 +6,14 @@ function CreatePost() {
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [caption, setCaption] = useState('');
-  const [media, setMedia] = useState(null);  
+  const [media, setMedia] = useState(null);
   const [error, setError] = useState('');
-  const [userId, setUserId] = useState(null);  
+  const [userId, setUserId] = useState(null);
+  const [mediaPreview, setMediaPreview] = useState(null); // Preview for media
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Try to get the userId from localStorage
     const storedUserId = localStorage.getItem('userId');
-    
-    // Check if the user is logged in
     if (storedUserId) {
       setUserId(storedUserId);
     } else {
@@ -25,12 +23,20 @@ function CreatePost() {
   }, [navigate]);
 
   const handleMediaChange = (e) => {
-    setMedia(e.target.files[0]);  // Only store the first selected file
+    const file = e.target.files[0];
+    setMedia(file);  // Store the selected file
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setMediaPreview(reader.result); // Set the preview
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');  // Clear previous errors
+    setError('');
 
     if (!location || !description || !caption || !userId) {
       setError('All fields are required.');
@@ -43,24 +49,22 @@ function CreatePost() {
       return;
     }
 
-    // Create FormData object to handle file uploads
     const formData = new FormData();
     formData.append('location', location);
     formData.append('description', description);
     formData.append('caption', caption);
-    formData.append('user_id', userId);  
+    formData.append('user_id', userId);
     if (media) {
       formData.append('media', media);
     }
 
     try {
-      // Send POST request to Flask API to create the post
       const response = await fetch('http://127.0.0.1:5000/posts/create', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
         },
-        body: formData, // Send the FormData object containing the file
+        body: formData,
       });
 
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
@@ -70,6 +74,7 @@ function CreatePost() {
       setDescription('');
       setCaption('');
       setMedia(null);
+      setMediaPreview(null);  // Clear media preview
 
       // Navigate to the posts page
       navigate('/posts');
@@ -93,6 +98,7 @@ function CreatePost() {
             onChange={(e) => setLocation(e.target.value)}
             placeholder="Location/Zipcode"
             required
+            className="form-input"
           />
           <textarea
             id="description"
@@ -101,6 +107,7 @@ function CreatePost() {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Description of the weather"
             required
+            className="form-textarea"
           />
           <textarea
             id="caption"
@@ -109,15 +116,32 @@ function CreatePost() {
             onChange={(e) => setCaption(e.target.value)}
             placeholder="Short caption"
             required
+            className="form-textarea"
           />
           <input
             type="file"
             id="media"
             name="media"
             onChange={handleMediaChange}
-            accept="image/*,video/*"  
+            accept="image/*,video/*"
+            className="form-file-input"
           />
-          <button type="submit">Create Post</button>
+          
+          {mediaPreview && (
+            <div className="media-preview">
+              <h3>Preview:</h3>
+              {mediaPreview && mediaPreview.includes('image') ? (
+                <img src={mediaPreview} alt="Preview" className="media-image" />
+              ) : (
+                <video controls className="media-video">
+                  <source src={mediaPreview} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              )}
+            </div>
+          )}
+
+          <button type="submit" className="submit-btn">Create Post</button>
         </form>
       )}
     </div>

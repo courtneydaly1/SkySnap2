@@ -14,7 +14,7 @@ function Navigation({ isLoggedIn, logout }) {
             My Dashboard
           </NavLink>
           <NavLink to="/posts" style={linkStyle} activestyle={activeLinkStyle}>
-            My Posts
+            Search Snaps
           </NavLink>
           <NavLink to="/weather/search" style={linkStyle} activestyle={activeLinkStyle}>
             Find Weather
