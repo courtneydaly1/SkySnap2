@@ -1,3 +1,102 @@
+### SkySnap
+A modern weather application built with React, React Router, and JWT authentication. The app allows users to sign up, log in, and view weather forecasts based on their location or a custom ZIP code. The app includes a posts feature where users can create and view posts related to weather.
+
+### Features
+Weather Forecast: 
+    Displays weather information for a user's local ZIP code or any specified ZIP code.
+User Authentication: 
+    Provides signup, login, and logout functionality.
+Protected Routes: 
+    Certain routes (Dashboard, Weather, Posts) are protected and only accessible by authenticated users.
+Create and View Posts: 
+    Users can create new posts related to weather and view others' posts.
+Responsive Design: 
+    The app is fully responsive, adjusting to different screen sizes.
+
+### Technologies Used
+React: A JavaScript library for building user interfaces.
+React Router: For handling routing and navigation.
+JWT (JSON Web Tokens): For user authentication.
+Axios: To make API calls for weather data and user actions.
+Styled Components / CSS: For styling the app with a modern and clean design.
+
+### Installation
+Prerequisites
+Node.js and npm (Node Package Manager) installed on your machine. You can download and install them from Node.js official website.
+
+### Setup
+Clone the repository:
+
+bash
+Copy
+git clone https://github.com/yourusername/weather-app.git
+Navigate to the project directory:
+
+bash
+Copy
+cd weather-app
+Install the dependencies:
+
+bash
+Copy
+npm install
+Set up environment variables (if required): Create a .env file in the root of the project and add the following:
+
+makefile
+Copy
+REACT_APP_API_BASE_URL=<Your_API_URL>
+Run the app:
+
+bash
+Copy
+npm start
+This will start the application on http://localhost:3000.
+
+
+### Key Components
+App.js
+    Handles user authentication using JWT and manages state.
+    Routes users to the Dashboard, Weather, and Posts pages based on their authentication status.
+UserContext.js
+    Context provider to manage user data globally throughout the app.
+ProtectedRoute.js
+    Protects routes such as Dashboard, Weather, and CreatePost from unauthorized users.
+WeatherApi.js
+    API calls for interacting with the backend weather service.
+    Handles actions like logging in, signing up, fetching weather data, etc.
+SearchWeather.js
+    A page that allows users to search for weather by ZIP code.
+WeatherPage.js
+    A page that displays the weather data for a specific location (user’s local ZIP code or a custom ZIP code).
+Dashboard.js
+    Displays user-specific data (like posts or weather).
+Posts.js & CreatePost.js
+    A feature that lets users create and view posts related to weather.
+LoadingSpinner.js
+    A simple spinner component used when data is loading.
+Authentication
+    The app uses JWT (JSON Web Tokens) to authenticate users.
+    Users can sign up and log in with their email and password.
+    Upon successful login, a token is stored in localStorage and used to authenticate requests.
+
+
+### Available Routes
+/login: Login page for returning users.
+/signup: Signup page for new users.
+/dashboard: Protected page showing user-specific data.
+/weather: Protected page showing the weather for the user’s location.
+/posts: Protected page for viewing user posts.
+/posts/create: Protected page for creating a new post.
+/weather/search: Page to search for weather by ZIP code.
+
+### How to Use
+Sign up for an account if you're a new user.
+Login with your credentials. You will be redirected to the Dashboard.
+On the Dashboard, you can access the weather page and create posts for your zipcode.
+The Weather Page allows you to view the weather for your current location (based on ZIP code) or any other ZIP code.
+The Posts Page lets you view weather-related posts from other users and create your own.
+
+
 # Click HERE for SkySnap Schema --->  [SkySnapSchema.pdf](https://github.com/user-attachments/files/17579600/SkySnapSchema.pdf)
 
 # API
@@ -73,3 +172,7 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+
+
