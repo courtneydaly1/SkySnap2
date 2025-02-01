@@ -25,7 +25,6 @@ def create_post():
         username= data.get('username')
         image_url = data.get('image_url')
         caption = data.get('caption')
-        realtime_weather_id = data.get('realtime_weather_id')
 
         # Validate required fields
         if not location:

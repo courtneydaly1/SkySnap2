@@ -335,7 +335,7 @@ def create_new_post():
 
 
 @app.route('/posts', methods=['GET'])
-@jwt_required()  
+@jwt_required()
 def get_posts():
     """Retrieve posts with pagination (for infinite scrolling)."""
     try:
@@ -355,6 +355,7 @@ def get_posts():
                 "error": "You must provide a zip code to view posts."
             }), 400
         app.logger.info(f"Retrieving Zipcode: {zip_code}")
+
         # If the user has a ZIP code, get the pagination params
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
@@ -382,9 +383,11 @@ def get_posts():
         posts_data = []
         for post in posts_query.items:
             post_data = post.serialize()
-            # if post.media:
-            #     post_data["media"] = [media.serialize() for media in post.media] 
-            post_data["image_url"]= post.image_url
+
+            # Replace 'localhost' with '127.0.0.1' in the image_url
+            if post_data.get("image_url"):
+                post_data["image_url"] = post_data["image_url"].replace("localhost", "127.0.0.1")
+            
             posts_data.append(post_data)
 
         return jsonify(posts_data)
@@ -392,6 +395,7 @@ def get_posts():
     except Exception as e:
         app.logger.error(f"Error retrieving posts: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
 
 
 
