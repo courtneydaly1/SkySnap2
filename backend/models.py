@@ -55,6 +55,7 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     image_url = db.Column(db.String(200))
     caption = db.Column(db.String(300), nullable=False)
+    image = db.Column(db.LargeBinary)
     realtime_weather_id = db.Column(db.Integer, db.ForeignKey('realtime_weather.id'))
     
     media = db.relationship('Media', backref='post', lazy=True)

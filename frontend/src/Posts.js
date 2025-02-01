@@ -49,6 +49,7 @@ function Posts() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
+          mode: 'cors',
       });
 
       if (!response.ok) {
@@ -62,7 +63,7 @@ function Posts() {
         setPosts((prevPosts) => [...prevPosts, ...data]);
       }
     } catch (err) {
-      setError('No current posts for this Zipcode or an error occurred.');
+      setError('No current posts for this Zipcode or an error has occurred.');
     } finally {
       setLoading(false);
     }
@@ -141,7 +142,14 @@ function Posts() {
             <p>{post.description}</p>
             <p><strong>Caption:</strong> {post.caption}</p>
             <p><strong>Created At:</strong> {new Date(post.created_at).toLocaleString()}</p>
-            {post.image_url && <img src={post.image_url} alt="Post" className="post-image" />}
+            {post.image_url && 
+            <img
+            src={post.image_url.startsWith('http') ? post.image_url : `http://127.0.0.1:5000${post.image_url}`}
+            alt="Post"
+            className="post-image"
+            onError={(e) => e.target.src = 'http://127.0.0.1:5000/static/uploads/placeholder.png'} 
+            />
+            }
           </div>
         ))}
       </div>

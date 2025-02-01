@@ -325,3 +325,37 @@ h1 {
 .create-post-btn {
   margin-top: 20px;
 }
+
+/* Post image styling */
+.post-image {
+  max-width: 80%; /* Limits image width to 80% of the parent container */
+  max-height: 400px; /* Limits image height */
+  margin-top: 15px;
+  border-radius: 10px;
+  object-fit: contain; /* Ensures image scales properly */
+}
+
+/* Post video styling */
+.post-video {
+  max-width: 80%; /* Limits video width to 80% of the parent container */
+  max-height: 400px; /* Limits video height */
+  margin-top: 15px;
+  border-radius: 10px;
+  object-fit: contain; /* Ensures the video scales properly */
+}
+
+/* For medium screens (tablets) */
+@media (max-width: 768px) {
+  .post-image, .post-video {
+    max-width: 90%; /* Increase size on tablets */
+    max-height: 300px; /* Slightly smaller height */
+  }
+}
+
+/* For small screens (mobile phones) */
+@media (max-width: 480px) {
+  .post-image, .post-video {
+    max-width: 100%; /* Full width for mobile */
+    max-height: 250px; /* Smaller height */
+  }
+}

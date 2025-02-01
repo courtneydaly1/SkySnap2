@@ -15,6 +15,7 @@ import Posts from "./Posts";
 import CreatePost from "./CreatePost"; 
 import ProtectedRoute from './ProtectedRoute';
 import SearchWeather from "./SearchWeather";
+import HelloPage from "./HelloPage";
 export const TOKEN_STORAGE_ID = 'token';
 
 
@@ -59,7 +60,9 @@ function App() {
         navigate('/login')
       } else if (currentPath === '/dashboard') {
         navigate('/dashboard');
-      } 
+      } else if (currentPath === '/hello'){
+        navigate('/hello')
+      }
     }
   }, [currentUser, navigate, infoLoaded]);  
 
@@ -111,6 +114,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginForm login={login} />} />
           <Route path="/signup" element={<SignupForm signup={signup} />} />
+          <Route path="/hello" element={<HelloPage />} />
+          
           
           {/* Use ProtectedRoute for protected routes */}
           <Route 

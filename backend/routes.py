@@ -1,5 +1,5 @@
 from app import app, db
-from flask import jsonify, request
+from flask import jsonify, request, send_from_directory
 from flask_cors import cross_origin
 import json
 from services.weather_services import *
@@ -16,6 +16,7 @@ from sqlalchemy.orm import joinedload
 from app import app
 import jwt
 from werkzeug.security import generate_password_hash
+import base64
 
 
 
@@ -46,10 +47,23 @@ def upload_file():
         unique_filename = f"{uuid.uuid4()}_{filename}"
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
         file.save(file_path)
-        return jsonify({"message": f"File {unique_filename} uploaded successfully!"}), 200
+
+        file_url = f"/static/uploads/{unique_filename}"
+        return jsonify({
+            "message": f"File {unique_filename} uploaded successfully!",
+            "file_url": file_url
+            }), 200
     else:
         return jsonify({"error": "Invalid file type"}), 400
 
+@app.route('/static/uploads/<filename>')
+def serve_image(filename):
+    # Ensure the file exists in the static folder
+    uploads_folder = os.path.join(app.root_path, 'static', 'uploads')
+    try:
+        return send_from_directory(uploads_folder, filename)
+    except FileNotFoundError:
+        return jsonify({"error": "File not found"}), 404
 
 # Base Routes
 @app.route('/', methods=['GET'])
@@ -254,6 +268,13 @@ def show_dashboard():
     return jsonify(dashboard_data), 200
 
 ############################## Post Routes
+@app.route('/hello', methods=['GET'])
+@jwt_required()
+def hello_world():
+    current_user=get_jwt_identity()
+    return jsonify({"message": "Hello World"}, user=current_user)
+
+
 
 @app.route('/posts/create', methods=['POST'])
 @jwt_required()  # Ensure the user is logged in
@@ -272,21 +293,31 @@ def create_new_post():
         
         if not location or not description or not caption:
             return jsonify({"error": "Missing required fields: location, description, caption."}), 400
-
-        # Create the post object
-        new_post = Post(
-            location=location,
-            description=description,
-            caption=caption,
-            user_id=user_id
-        )
-
+        
         # Handle file upload (media file)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
-            new_post.image_url = file_path  
+            image_url = f"http://127.0.0.1:5000/static/uploads/{filename}"
+        else:
+            image_url = None 
+            
+        # Create the post object
+        new_post = Post(
+            location=location,
+            description=description,
+            caption=caption,
+            user_id=user_id,
+            image_url = image_url
+        )
+
+        # # Handle file upload (media file)
+        # if file and allowed_file(file.filename):
+        #     filename = secure_filename(file.filename)
+        #     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        #     file.save(file_path)
+        #     new_post.image_url = f"/static/uploads/{filename}"
         
         # Save the post to the database
         db.session.add(new_post)
@@ -351,8 +382,9 @@ def get_posts():
         posts_data = []
         for post in posts_query.items:
             post_data = post.serialize()
-            if post.media:
-                post_data["media"] = [media.serialize() for media in post.media] 
+            # if post.media:
+            #     post_data["media"] = [media.serialize() for media in post.media] 
+            post_data["image_url"]= post.image_url
             posts_data.append(post_data)
 
         return jsonify(posts_data)

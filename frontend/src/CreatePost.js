@@ -10,6 +10,7 @@ function CreatePost() {
   const [error, setError] = useState('');
   const [userId, setUserId] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null); // Preview for media
+  const [uploadedMediaUrl, setUploadedMediaUrl] = useState(null); // URL after upload
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,11 +25,11 @@ function CreatePost() {
 
   const handleMediaChange = (e) => {
     const file = e.target.files[0];
-    setMedia(file);  // Store the selected file
+    setMedia(file);  
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setMediaPreview(reader.result); // Set the preview
+        setMediaPreview(reader.result); // Preview the selected media before upload
       };
       reader.readAsDataURL(file);
     }
@@ -65,7 +66,11 @@ function CreatePost() {
           'Authorization': `Bearer ${token}`,
         },
         body: formData,
+        mode: 'cors',
       });
+
+      const res = await response.json();
+      const newPost = res;
 
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
 
@@ -74,7 +79,10 @@ function CreatePost() {
       setDescription('');
       setCaption('');
       setMedia(null);
-      setMediaPreview(null);  // Clear media preview
+      setMediaPreview(null);  
+
+      // Save the image URL returned from the backend
+      setUploadedMediaUrl(`http://127.0.0.1:5000${newPost.image_url}`);
 
       // Navigate to the posts page
       navigate('/posts');
@@ -122,6 +130,7 @@ function CreatePost() {
             type="file"
             id="media"
             name="media"
+            aria-label="Upload media"
             onChange={handleMediaChange}
             accept="image/*,video/*"
             className="form-file-input"
@@ -144,11 +153,27 @@ function CreatePost() {
           <button type="submit" className="submit-btn">Create Post</button>
         </form>
       )}
+
+      {/* Show the uploaded image after post creation */}
+      {uploadedMediaUrl && (
+        <div className="uploaded-media">
+          <h3>Uploaded Media:</h3>
+          {uploadedMediaUrl.includes('image') ? (
+            <img src={uploadedMediaUrl} alt="Uploaded Post Media" className="uploaded-media-image" />
+          ) : (
+            <video controls className="uploaded-media-video">
+              <source src={uploadedMediaUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
 export default CreatePost;
+
 
 
 
