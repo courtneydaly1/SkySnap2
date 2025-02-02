@@ -19,6 +19,7 @@ A modern weather application built with React, React Router, and JWT authenticat
 - **React**: A JavaScript library for building user interfaces.
 - **React Router**: For handling routing and navigation.
 - **JWT (JSON Web Tokens)**: For user authentication.
+- **Flask**: Backend.
 - **Axios**: To make API calls for weather data and user actions.
 - **Styled Components / CSS**: For styling the app with a modern and clean design.
 
@@ -33,6 +34,7 @@ Ensure you have the following installed:
 - [Node.js](https://nodejs.org/)
 - [npm](https://www.npmjs.com/)
 - Python (for server-side requirements)
+- React JS frontend
 
 #### Setup for Frontend (React)
 
