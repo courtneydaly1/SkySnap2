@@ -135,7 +135,7 @@ function Dashboard() {
 
       {showWeather && forecast && (
         <div className="forecast-container">
-          <h2>5-Day Forecast for ZIP: {user.local_zipcode}</h2>
+          <h2>7-Day Forecast for ZIP: {user.local_zipcode}</h2>
           <div className="forecast-cards">
             {forecast.map((day, index) => (
               <div className="forecast-card" key={index}>

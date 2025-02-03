@@ -38,7 +38,7 @@ function WeatherPage() {
 
   return (
     <div className="weather-page-container">
-      <h1>5-Day Forecast for {zipcode}</h1>
+      <h1>7-Day Forecast for {zipcode}</h1>
       <ul className="forecast-list">
         {forecast.map((day, index) => (
           <li key={index} className="forecast-item">
