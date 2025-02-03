@@ -1,7 +1,7 @@
 # SkySnap
 
 A modern weather application built with React, React Router, and JWT authentication. The app allows users to sign up, log in, and view weather forecasts based on their location or a custom ZIP code. The app includes a posts feature where users can create and view images/videos related to weather.
-![Home][/static/uploads/Home.png]
+! [Home](/static/uploads/Home.png)
 ---
 
 ### Features
