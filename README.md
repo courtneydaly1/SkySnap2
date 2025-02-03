@@ -132,13 +132,13 @@ Once the dependencies are installed for both frontend and backend, you can run t
 
 #### For Backend:
 
-1. **Run the Flask server** (if you have a backend):
+1. **Run the Flask server** (backend):
 
     ```bash
     flask run
     ```
 
-   This will start the backend API server, typically on [http://localhost:5000](http://localhost:5000).
+   This will start the backend API server, on [http://localhost:5000](http://localhost:5000).
 
 ---
 
