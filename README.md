@@ -7,9 +7,12 @@ A modern weather application built with React, React Router, and JWT authenticat
 ### Features
 
 - **Weather Forecast**: Displays weather information for a user's local ZIP code or any specified ZIP code.
+! [Weather](backend/static/uploads/Weather.png)
 - **User Authentication**: Provides signup, login, and logout functionality.
 - **Protected Routes**: Certain routes (Dashboard, Weather, Posts) are protected and only accessible by authenticated users.
 - **Create and View Posts**: Users can create new posts related to weather and view others' posts.
+! [ViewSnap](backend/static/uploads/SearchSnaps.png)
+! [CreateSnap](backend/static/uploads/NewSnap.png)
 - **Responsive Design**: The app is fully responsive, adjusting to different screen sizes.
 
 ---
