@@ -142,14 +142,14 @@ npm start
 
 1. **Run the Flask server** (backend):
 
-# Navigate to backend directory;
+# Navigate to backend directory
 
-    ```bash
-    cd SkySnap2/backend
-    ```
-    ```bash
-    flask run
-    ```
+```bash
+cd SkySnap2/backend
+```
+```bash
+flask run
+```
 
    This will start the backend API server, on [http://localhost:5000](http://localhost:5000).
 
