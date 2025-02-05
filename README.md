@@ -44,13 +44,13 @@ Ensure you have the following installed:
 1. **Clone the repository**:
 
     ```bash
-    git clone https://github.com/yourusername/SkySnap2.git
+    git clone https://github.com/courtneydaly1/SkySnap2.git
     ```
 
 2. **Navigate to the project directory**:
 
     ```bash
-    cd <project_root>/frontend
+    cd <SkySnap2>/frontend
     ```
 
 3. **Install frontend dependencies**:
@@ -60,6 +60,12 @@ Ensure you have the following installed:
     ```
 
 #### Setup for Backend (Python)
+
+1. **Navigate to the backend directory**:
+
+    ```bash
+    cd <SkySnap2>/backend
+    ```
 
 1. Create a virtual environment:
 
@@ -104,6 +110,14 @@ SECRET_KEY= your-secret-key-here
 BASE_URL=https://api.tomorrow.io/v4/
 WEATHER_API_KEY= your-weather-api-key-here
 
+-Important: Replace the placeholders (your-secret-key-here, your-weather-api-key-here, your-geocoding-api-key-here) with your actual keys and values.
+
+# Make sure the .env file is added to .gitignore to prevent sensitive data from being committed:
+
+```bash
+# .gitignore
+.env
+```
 
 ### Run the App
 
@@ -112,6 +126,12 @@ Once the dependencies are installed for both frontend and backend, you can run t
 #### For Frontend:
 
 1. **Start the React development server**:
+
+# Navigate to frontend directory
+
+    ```bash
+    cd <SkySnap2>/frontend
+    ```
 
     ```bash
     npm start
@@ -122,6 +142,12 @@ Once the dependencies are installed for both frontend and backend, you can run t
 #### For Backend:
 
 1. **Run the Flask server** (backend):
+
+# Navigate to backend directory;
+
+    ```bash
+    cd <SkySnap2>/backend
+    ```
 
     ```bash
     flask run
