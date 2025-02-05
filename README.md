@@ -50,7 +50,7 @@ Ensure you have the following installed:
 2. **Navigate to the project directory**:
 
     ```bash
-    cd <SkySnap2>/frontend
+    cd SkySnap2/frontend
     ```
 
 3. **Install frontend dependencies**:
@@ -64,7 +64,7 @@ Ensure you have the following installed:
 1. **Navigate to the backend directory**:
 
     ```bash
-    cd <SkySnap2>/backend
+    cd SkySnap2/backend
     ```
 
 1. Create a virtual environment:
@@ -129,13 +129,12 @@ Once the dependencies are installed for both frontend and backend, you can run t
 
 # Navigate to frontend directory
 
-    ```bash
-    cd <SkySnap2>/frontend
-    ```
-
-    ```bash
-    npm start
-    ```
+```bash
+cd <SkySnap2>/frontend
+```
+```bash
+npm start
+```
 
    This will start the application on [http://localhost:3000](http://localhost:3000).
 
@@ -146,9 +145,8 @@ Once the dependencies are installed for both frontend and backend, you can run t
 # Navigate to backend directory;
 
     ```bash
-    cd <SkySnap2>/backend
+    cd SkySnap2/backend
     ```
-
     ```bash
     flask run
     ```
