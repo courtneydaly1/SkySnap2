@@ -100,15 +100,15 @@ CREATE DATABASE SkySnap
 ### Create an .env file in your root directory
 
 # Database Configuration
-DATABASE_URL=postgresql:///SkySnap
-SQLALCHEMY_DATABASE_URI=postgresql:///SkySnap
+-DATABASE_URL=postgresql:///SkySnap
+-SQLALCHEMY_DATABASE_URI=postgresql:///SkySnap
 
 # Secret Key for JWT or Session Management
 SECRET_KEY= your-secret-key-here
 
 # Tomorrow.io Weather API
-BASE_URL=https://api.tomorrow.io/v4/
-WEATHER_API_KEY= your-weather-api-key-here
+-BASE_URL=https://api.tomorrow.io/v4/
+-WEATHER_API_KEY= your-weather-api-key-here
 
 -Important: Replace the placeholders (your-secret-key-here, your-weather-api-key-here, your-geocoding-api-key-here) with your actual keys and values.
 
