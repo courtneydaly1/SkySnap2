@@ -44,13 +44,13 @@ Ensure you have the following installed:
 1. **Clone the repository**:
 
     ```bash
-    git clone https://github.com/yourusername/weather-app.git
+    git clone https://github.com/yourusername/SkySnap2.git
     ```
 
 2. **Navigate to the project directory**:
 
     ```bash
-    cd weather-app
+    cd <project_root>/frontend
     ```
 
 3. **Install frontend dependencies**:
@@ -61,7 +61,7 @@ Ensure you have the following installed:
 
 #### Setup for Backend (Python)
 
-1. If you are also setting up the backend, you can create a virtual environment:
+1. Create a virtual environment:
 
     ```bash
     python -m venv venv
@@ -78,43 +78,32 @@ Ensure you have the following installed:
       .\venv\Scripts\activate
       ```
 
-3. **Download and install the backend requirements** by creating a `requirements.txt` file in the backend folder with the following content:
-
-    ```plaintext
-    alembic==1.13.3
-    axios==0.4.0
-    blinker==1.8.2
-    certifi==2024.8.30
-    charset-normalizer==3.3.2
-    click==8.1.7
-    Flask==3.0.3
-    Flask-DebugToolbar==0.16.0
-    Flask-Migrate==4.0.7
-    Flask-SQLAlchemy==3.1.1
-    idna==3.10
-    itsdangerous==2.2.0
-    Jinja2==3.1.4
-    lxml==5.3.0
-    Mako==1.3.5
-    markdown-it-py==3.0.0
-    MarkupSafe==2.1.5
-    mdurl==0.1.2
-    Pygments==2.18.0
-    requests==2.32.3
-    rich==13.9.2
-    SQLAlchemy==2.0.35
-    typing_extensions==4.12.2
-    urllib3==2.2.3
-    Werkzeug==3.0.4
-    ```
-
-4. **Install the backend dependencies**:
+3. **Install the backend dependencies**:
 
     ```bash
     pip install -r requirements.txt
     ```
 
 ---
+### Create Database:
+
+```bash
+CREATE DATABASE SkySnap
+```
+
+### Create an .env file in your root directory
+
+# Database Configuration
+DATABASE_URL=postgresql:///SkySnap
+SQLALCHEMY_DATABASE_URI=postgresql:///SkySnap
+
+# Secret Key for JWT or Session Management
+SECRET_KEY= your-secret-key-here
+
+# Tomorrow.io Weather API
+BASE_URL=https://api.tomorrow.io/v4/
+WEATHER_API_KEY= your-weather-api-key-here
+
 
 ### Run the App
 
